@@ -7,6 +7,9 @@ app = 'nahtwerk-ui'
 
 [build]
 
+[env]
+  MEDUSA_URL='https://backend.nahtwerk.at'
+
 [http_service]
   internal_port = 3000
   force_https = true
@@ -19,3 +22,5 @@ app = 'nahtwerk-ui'
   memory = '1gb'
   cpu_kind = 'shared'
   cpus = 1
+
+

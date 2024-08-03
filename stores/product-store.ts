@@ -1,6 +1,4 @@
 import {useMedusaClient} from "#imports";
-import type {ProductsResource} from "@medusajs/medusa-js";
-import type {StoreProductsListRes, StoreProductsRes} from "@medusajs/medusa";
 import type {PricedProduct} from "@medusajs/medusa/dist/types/pricing";
 import type {Ref} from "vue";
 

@@ -7,6 +7,7 @@
 
   onMounted(() => useFlowbite((flowbite: any) => flowbite.initFlowbite()));
 
+
 </script>
 
 <style>

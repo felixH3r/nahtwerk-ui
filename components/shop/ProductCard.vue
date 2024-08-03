@@ -1,8 +1,9 @@
 <template>
-  <div class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+  <div class="rounded-lg bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
     <div class="flex items-center justify-center h-56 w-full">
-      <NuxtLink to="/">
-        <NuxtImg v-if="!showPlaceholderImg" class="mx-auto h-full dark:hidden"
+      <NuxtLink to="/" class="flex justify-center items-center w-full">
+        <NuxtImg v-if="!showPlaceholderImg"
+                 class="mx-auto h-56 w-full object-fill object-center rounded-lg dark:hidden"
                  :src="getThumbnail" alt=""/>
         <ImgPlaceholderSVG v-else/>
       </NuxtLink>
@@ -48,7 +49,7 @@
             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M4 4h1.5L8 16m0 0h8m-8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm.75-3H7.5M11 7H6.312M17 4v6m-3-3h6"/>
           </svg>
-          In den Warenkorb
+          Warenkorb
         </button>
       </div>
     </div>

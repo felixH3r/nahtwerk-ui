@@ -8,8 +8,7 @@
 
         <div class="mb-4 grid gap-4 sm:grid-cols-2 md:mb-8 lg:grid-cols-3 xl:grid-cols-4">
 
-          <ProductCard/>
-          <ProductCard/>
+          <ProductCard v-for="product in products" :product="product"/>
 
         </div>
       </div>
@@ -19,6 +18,11 @@
 
 <script setup lang="ts">
   import ProductCard from "~/components/shop/ProductCard.vue";
+
+  const store = useProductStore();
+  const {products} = storeToRefs(store);
+
+
 </script>
 
 <style scoped>
