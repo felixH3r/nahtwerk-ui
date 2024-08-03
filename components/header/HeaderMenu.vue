@@ -1,12 +1,12 @@
 <template>
   <div class="flex items-center space-x-8">
     <div class="shrink-0">
-      <a href="#" title="" class="">
+      <NuxtLink to="/">
         <img class="block w-auto h-16 dark:hidden"
              src="https://nahtwerk-uploads.s3.amazonaws.com/Nahtwerk_logo.png" alt="">
         <img class="hidden w-auto h-8 dark:block"
              src="https://nahtwerk-uploads.s3.amazonaws.com/Nahtwerk_logo.png" alt="">
-      </a>
+      </NuxtLink>
     </div>
 
     <ul class="hidden lg:flex items-center justify-start gap-6 md:gap-8 py-3 sm:justify-center">
