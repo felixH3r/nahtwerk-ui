@@ -1,7 +1,7 @@
 <template>
   <div class="rounded-lg bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
     <div class="flex items-center justify-center h-56 w-full">
-      <NuxtLink to="/" class="flex justify-center items-center w-full">
+      <NuxtLink :to="getProductRoute()" class="flex justify-center items-center w-full">
         <NuxtImg v-if="!showPlaceholderImg"
                  class="mx-auto h-56 w-full object-fill object-center rounded-lg dark:hidden"
                  :src="getThumbnail" alt=""/>
@@ -88,6 +88,11 @@
     }
     return "No subtitle";
   });
+
+  const getProductRoute = () => {
+    return `/products/${props.product.handle}`;
+  };
+
 </script>
 
 <style scoped>
