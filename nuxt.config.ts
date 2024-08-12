@@ -6,5 +6,6 @@ export default defineNuxtConfig({
   pinia: {
     storesDirs: ['./stores/**', './custom-folder/stores/**'],
   },
+  // @ts-ignore
   isr: true
 });

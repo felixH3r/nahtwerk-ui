@@ -9,6 +9,6 @@ export const useProductStore = defineStore('products', () => {
     const productsList = await useMedusaClient().products.list();
     products.value = productsList.products;
   };
-
+  
   return {products, fetchProducts};
 });
