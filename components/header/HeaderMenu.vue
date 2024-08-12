@@ -11,20 +11,24 @@
 
     <ul class="hidden lg:flex items-center justify-start gap-6 md:gap-8 py-3 sm:justify-center">
       <li>
-        <a href="#" title=""
-           class="flex text-sm font-medium text-gray-900 hover:text-primary-700 dark:text-white dark:hover:text-primary-500">
+        <NuxtLink to="/" title=""
+                  class="flex text-sm font-light text-gray-500 hover:text-primary-700 dark:text-white dark:hover:text-primary-500"
+                  :class="{'font-medium text-gray-900': useRoute().fullPath===SLUGS.HOME}"
+        >
           Home
-        </a>
+        </NuxtLink>
       </li>
       <li class="shrink-0">
-        <a href="#" title=""
-           class="flex text-sm font-medium text-gray-900 hover:text-primary-700 dark:text-white dark:hover:text-primary-500">
+        <NuxtLink to="/shop" title=""
+                  class="flex text-sm font-light text-gray-500 hover:text-primary-700 dark:text-white dark:hover:text-primary-500"
+                  :class="{'font-medium text-gray-900': useRoute().fullPath===SLUGS.SHOP}"
+        >
           Shop
-        </a>
+        </NuxtLink>
       </li>
       <li class="shrink-0">
         <a href="#" title=""
-           class="flex text-sm font-medium text-gray-900 hover:text-primary-700 dark:text-white dark:hover:text-primary-500">
+           class="flex text-sm font-light text-gray-500 hover:text-primary-700 dark:text-white dark:hover:text-primary-500">
           Über mich
         </a>
       </li>
@@ -35,7 +39,27 @@
 </template>
 
 <script setup lang="ts">
+  import {useRoute} from "vue-router";
 
+  enum SLUGS {
+    HOME = '/',
+    SHOP = '/shop',
+    ÜBER_MICH = '/über-mich'
+  }
+
+  onMounted(() => {
+    console.log(useRoute().fullPath, 'actual route');
+  });
+
+
+  // const isActive = computed((): boolean => {
+  //   // @ts-ignore
+  //   if (useRoute() !== slug.HOME) {
+  //     return false;
+  //   } else {
+  //     return true;
+  //   }
+  // });
 </script>
 
 <style scoped>
