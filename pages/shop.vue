@@ -12,6 +12,9 @@
     if (!store.products) {
       await store.fetchProducts();
     }
+    if (!store.storeCart) {
+      await store.createCart();
+    }
   });
 
 
