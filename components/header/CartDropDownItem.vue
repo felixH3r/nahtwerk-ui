@@ -2,15 +2,21 @@
   <div class="grid grid-cols-2">
     <div>
       <a href="#"
-         class="truncate text-sm font-semibold leading-none text-gray-900 dark:text-white hover:underline">Apple
-        iPhone 15</a>
-      <p class="mt-0.5 truncate text-sm font-normal text-gray-500 dark:text-gray-400">$599</p>
+         class="truncate text-sm font-semibold leading-none text-gray-900 dark:text-white hover:underline">
+        {{ lineItem?.title ? lineItem.title : 'Unbekannt' }}
+      </a>
+      <p class="mt-0.5 truncate text-sm font-normal text-gray-500 dark:text-gray-400">€ {{
+          lineItem?.total ? formatPrice(lineItem.total) : '0,00'
+        }}</p>
+      <p class="mt-0.5 truncate text-sm font-normal text-gray-500 dark:text-gray-400">
+        Größe: {{ lineItem.variant.title }}
+      </p>
     </div>
 
     <div class="flex items-center justify-end gap-6">
-      <p class="text-sm font-normal leading-none text-gray-500 dark:text-gray-400">Qty: 1</p>
+      <p class="text-sm font-normal leading-none text-gray-500 dark:text-gray-400">Menge: {{ lineItem?.quantity }}</p>
 
-      <button data-tooltip-target="tooltipRemoveItem1a" type="button"
+      <button @click="removeFromCart" data-tooltip-target="tooltipRemoveItem1a" type="button"
               class="text-red-600 hover:text-red-700 dark:text-red-500 dark:hover:text-red-600">
         <span class="sr-only"> Remove </span>
         <svg class="h-4 w-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor"
@@ -30,6 +36,16 @@
 </template>
 
 <script setup lang="ts">
+
+  const props = defineProps<{
+    lineItem: any;
+  }
+  >();
+
+  const removeFromCart = async () => {
+    await useProductStore().removeFromCart(props.lineItem.id);
+  };
+
 
 </script>
 

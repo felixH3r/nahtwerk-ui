@@ -68,7 +68,7 @@
             {{ product?.description }}
           </p>
 
-          <div class="mt-6 sm:gap-4 sm:items-center sm:flex sm:mt-8">
+          <div @click="addToCart" class="mt-6 sm:gap-4 sm:items-center sm:flex sm:mt-8">
             <a
                 href="#"
                 title=""
@@ -92,7 +92,6 @@
                     d="M4 4h1.5L8 16m0 0h8m-8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm.75-3H7.5M11 7H6.312M17 4v6m-3-3h6"
                 />
               </svg>
-
               In den Warenkorb
             </a>
           </div>
@@ -111,6 +110,7 @@
   import FabricThumbnail from "~/components/product/FabricThumbnail.vue";
   import Slider from "~/components/utils/Slider.vue";
   import ProductImage from "~/components/product/ProductImage.vue";
+  import {formatPrice} from "~/utils/utils";
 
   const route = useRoute();
   const product: Ref<Nullable<PricedProduct>> = ref(null);
@@ -142,9 +142,9 @@
         !selectedVariant.value ||
         !selectedVariant.value.calculated_price
     ) {
-      return 0;
+      return '0,00';
     }
-    return (Math.floor(selectedVariant.value.calculated_price) / 100).toFixed(2).toString().replace('.', ',');
+    return formatPrice(selectedVariant.value.calculated_price);
   });
 
   const selectInnerFabric = (index: number, fabric: Fabric) => {
@@ -161,6 +161,15 @@
   const selectVariant = (index: number, variant: PricedVariant): void => {
     selectedVariantIndex.value = index;
     selectedVariant.value = variant;
+  };
+
+  const addToCart = async () => {
+    if (selectedVariant.value && selectedVariant.value.id && selectedInnerFabric.value && selectedOuterFabric.value) {
+      await store.addToCart(selectedVariant.value.id, {
+        innerFabric: selectedInnerFabric.value,
+        outerFabric: selectedOuterFabric.value
+      });
+    }
   };
 
   onMounted(async () => {

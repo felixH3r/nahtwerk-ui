@@ -1,6 +1,6 @@
 <template>
   <div class="shrink-0 max-w-md lg:max-w-lg mx-auto">
-    <NuxtImg class="w-full h-96 rounded-lg mb-3 object-cover" :src="selectedImage" alt=""/>
+    <NuxtImg class="w-full h-96 rounded-lg mb-3 object-cover" :src="getSelectedImage"/>
     <Slider :height-class="'h-32'">
       <MediaThumbnail
           v-for="(imageUrl, index) in getImagesWithThumbnail"
@@ -33,6 +33,16 @@
       return [props.product.thumbnail, ...props.product.images.map((image: any) => image.url)];
     }
     return [];
+  });
+
+  const getSelectedImage = computed((): string => {
+    if (props.product && props.product.thumbnail && selectedImageIndex.value === 0) {
+      return props.product.thumbnail;
+    }
+    if (selectedImage.value) {
+      return selectedImage.value;
+    }
+    return '';
   });
 
   const selectImage = (index: number, imageUrl: string): void => {

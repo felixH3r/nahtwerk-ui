@@ -1,4 +1,4 @@
-import {useMedusaClient} from "#imports";
+import Fabric, {useMedusaClient} from "#imports";
 import type {PricedProduct} from "@medusajs/medusa/dist/types/pricing";
 import type {Ref} from "vue";
 import {Cart} from "@medusajs/medusa";
@@ -34,5 +34,22 @@ export const useProductStore = defineStore('products', () => {
     }
   };
 
-  return {products, fetchProducts, storeCart, createCart};
+  const addToCart = async (variant_id: string, metadata: { innerFabric: Fabric, outerFabric: Fabric }) => {
+    const client = useMedusaClient();
+    if (storeCart.value) {
+      const {cart} = await client.carts.lineItems.create(storeCart.value.id, {variant_id, quantity: 1, metadata});
+      storeCart.value = cart;
+    }
+  };
+
+  const removeFromCart = async (line_id: string) => {
+    const client = useMedusaClient();
+    if (storeCart.value) {
+      const {cart} = await client.carts.lineItems.delete(storeCart.value.id, line_id);
+      storeCart.value = cart;
+    }
+  };
+
+
+  return {products, fetchProducts, storeCart, createCart, addToCart, removeFromCart};
 });

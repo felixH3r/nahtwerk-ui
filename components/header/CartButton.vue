@@ -18,7 +18,9 @@
 
   <div id="myCartDropdown1"
        class="hidden z-10 mx-auto max-w-sm space-y-4 overflow-hidden rounded-lg bg-white p-4 antialiased shadow-lg dark:bg-gray-800">
-    <CartDropDownItem/>
+    <span v-if="noItems"
+          class="text-sm font-medium leading-none text-gray-900 dark:text-white"> Dein Warenkorb ist leer. </span>
+    <CartDropDownItem v-for="(lineItem, index) in getLineItems" :key="index" :lineItem="lineItem"/>
 
 
     <a href="#" title=""
@@ -30,6 +32,21 @@
 <script setup lang="ts">
 
   import CartDropDownItem from "~/components/header/CartDropDownItem.vue";
+
+  const noItems = ref(false);
+
+  const store = useProductStore();
+  const getLineItems = computed(() => {
+    if (store.storeCart) {
+      if (store.storeCart.items.length === 0) {
+        noItems.value = true;
+        return [];
+      }
+      noItems.value = false;
+      return store.storeCart.items;
+    }
+    return [];
+  });
 </script>
 
 <style scoped>
