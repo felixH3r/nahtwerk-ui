@@ -3,7 +3,7 @@
     <div class="flex items-center justify-center h-56 w-full">
       <NuxtLink :to="getProductRoute()" class="flex justify-center items-center w-full">
         <NuxtImg v-if="!showPlaceholderImg"
-                 class="mx-auto h-56 w-full object-fill object-center rounded-lg dark:hidden"
+                 class="mx-auto h-56 w-full object-cover object-center rounded-lg dark:hidden"
                  :src="getThumbnail" alt=""/>
         <ImgPlaceholderSVG v-else/>
       </NuxtLink>
