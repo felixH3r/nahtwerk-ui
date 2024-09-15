@@ -4,8 +4,12 @@
 
 <script setup lang="ts">
   import {useFlowbite} from "~/composables/useFlowbite";
+  import {useProductStore} from "#imports";
 
-  onMounted(() => useFlowbite((flowbite: any) => flowbite.initFlowbite()));
+  onMounted(async () => {
+    useFlowbite((flowbite: any) => flowbite.initFlowbite());
+    await useProductStore().createCart();
+  });
 
 
 </script>

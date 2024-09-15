@@ -7,5 +7,5 @@ export default defineNuxtConfig({
     storesDirs: ['./stores/**', './custom-folder/stores/**'],
   },
   // @ts-ignore
-  isr: true
+  // isr: true
 });

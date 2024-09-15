@@ -2,10 +2,7 @@
   <section class="py-8 bg-white md:py-16 dark:bg-gray-900 antialiased">
     <div class="max-w-screen-xl px-4 mx-auto 2xl:px-0">
       <div class="lg:grid lg:grid-cols-2 lg:gap-8 xl:gap-16">
-        <div class="shrink-0 max-w-md lg:max-w-lg mx-auto">
-          <img class="w-full" :src="product?.thumbnail"
-               alt=""/>
-        </div>
+        <ProductImage :product="product"/>
 
         <div class="mt-6 sm:mt-8 lg:mt-0">
           <h1
@@ -17,21 +14,59 @@
             <p
                 class="text-2xl font-extrabold text-gray-900 sm:text-3xl dark:text-white"
             >
-              € {{ selectedVariant?.calculated_price }}
+              € {{ getSelectedPrice }}
             </p>
           </div>
 
-          <!-- Variants Gallery -->
-          <div class="flex gap-3">
-            <VariantsThumbnail
-                v-for="(variant, index) in product?.variants"
-                :key="index"
-                :variant="variant"
-                :isSelected="selectedIndex === index"
-                @select="selectVariant(index, variant)"
-            />
+          <!-- Innerfabric Gallery -->
+          <div>
+            <h2 class="text-lg font-medium">Innenstoff:</h2>
+            <Slider :height-class="'h-20'">
+              <FabricThumbnail
+                  v-for="(fabric, index) in product?.metadata?.innerFabrics"
+                  :key="index"
+                  :index="index"
+                  :fabric="fabric"
+                  :isSelected="selectedInnerFabricIndex === index"
+                  :onSelect="selectInnerFabric"
+              />
+            </Slider>
           </div>
 
+          <!-- Outerfabric Gallery -->
+          <div>
+            <h2 class="text-lg font-medium">Außenstoff:</h2>
+
+            <Slider :height-class="'h-20'">
+              <FabricThumbnail
+                  v-for="(fabric, index) in product?.metadata?.outerFabrics"
+                  :key="index"
+                  :index="index"
+                  :fabric="fabric"
+                  :isSelected="selectedOuterFabricIndex === index"
+                  :onSelect="selectOuterFabric"
+              />
+            </Slider>
+          </div>
+
+          <!-- Variants Gallery -->
+          <div>
+            <h2 class="text-lg font-medium">Größe:</h2>
+            <Slider class="w-full" :height-class="'h-20'">
+              <VariantsThumbnail
+                  v-for="(variant, index) in product?.variants"
+                  :key="index"
+                  :index="index"
+                  :variant="variant"
+                  :isSelected="selectedVariantIndex === index"
+                  :onSelect="selectVariant"
+              />
+            </Slider>
+          </div>
+
+          <p class="mb-6 text-gray-500 dark:text-gray-400">
+            {{ product?.description }}
+          </p>
 
           <div class="mt-6 sm:gap-4 sm:items-center sm:flex sm:mt-8">
             <a
@@ -63,10 +98,6 @@
           </div>
 
           <hr class="my-6 md:my-8 border-gray-200 dark:border-gray-800"/>
-
-          <p class="mb-6 text-gray-500 dark:text-gray-400">
-            {{ product?.description }}
-          </p>
         </div>
       </div>
     </div>
@@ -74,21 +105,30 @@
 </template>
 
 <script setup lang="ts">
-
   import {useRoute} from "vue-router";
-  import type {PricedProduct, PricedVariant} from "@medusajs/medusa/dist/types/pricing";
+  import type {PricedProduct, PricedVariant,} from "@medusajs/medusa/dist/types/pricing";
   import VariantsThumbnail from "~/components/product/VariantsThumbnail.vue";
+  import FabricThumbnail from "~/components/product/FabricThumbnail.vue";
+  import Slider from "~/components/utils/Slider.vue";
+  import ProductImage from "~/components/product/ProductImage.vue";
 
   const route = useRoute();
   const product: Ref<Nullable<PricedProduct>> = ref(null);
   const store = useProductStore();
   const {products} = storeToRefs(store);
   const selectedVariant: Ref<Nullable<PricedVariant>> = ref(null);
+  const selectedVariantIndex: Ref<Nullable<number>> = ref(null);
+  const selectedInnerFabric: Ref<Nullable<Fabric>> = ref(null);
+  const selectedInnerFabricIndex: Ref<Nullable<number>> = ref(null);
+  const selectedOuterFabric: Ref<Nullable<Fabric>> = ref(null);
+  const selectedOuterFabricIndex: Ref<Nullable<number>> = ref(null);
 
   const getProduct = computed((): PricedProduct | null => {
     const productHandle = route.params.productTitle as string;
     if (products.value) {
-      const foundProduct: PricedProduct | undefined = products.value.find((pro) => pro.handle === productHandle);
+      const foundProduct: PricedProduct | undefined = products.value.find(
+          (pro) => pro.handle === productHandle
+      );
       if (foundProduct) {
         return foundProduct;
       }
@@ -96,11 +136,30 @@
     return null;
   });
 
-  const selectedIndex: Ref<Nullable<number>> = ref(null);
+  const getSelectedPrice = computed((): string => {
+    if (
+        !selectedVariant ||
+        !selectedVariant.value ||
+        !selectedVariant.value.calculated_price
+    ) {
+      return 0;
+    }
+    return (Math.floor(selectedVariant.value.calculated_price) / 100).toFixed(2).toString().replace('.', ',');
+  });
+
+  const selectInnerFabric = (index: number, fabric: Fabric) => {
+    selectedInnerFabricIndex.value = index;
+    selectedInnerFabric.value = fabric;
+  };
+
+  const selectOuterFabric = (index: number, fabric: Fabric) => {
+    selectedOuterFabricIndex.value = index;
+    selectedOuterFabric.value = fabric;
+  };
 
   // Method to update the selected item
-  const selectVariant = (index: number, variant: PricedVariant) => {
-    selectedIndex.value = index;
+  const selectVariant = (index: number, variant: PricedVariant): void => {
+    selectedVariantIndex.value = index;
     selectedVariant.value = variant;
   };
 
@@ -109,13 +168,16 @@
       await store.fetchProducts();
     }
     product.value = getProduct.value;
-    selectVariant(0, product.value.variants[0]);
-    console.log(selectedVariant.value.prices);
-    console.log(selectedVariant.value.calculated_price);
+    if (product.value) {
+      selectVariant(0, product.value.variants[0]);
+      if (product.value.metadata && product.value.metadata.innerFabrics) {
+        selectInnerFabric(0, product.value.metadata.innerFabrics[0]);
+      }
+      if (product.value.metadata && product.value.metadata.outerFabrics) {
+        selectOuterFabric(0, product.value.metadata.outerFabrics[0]);
+      }
+    }
   });
-
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

@@ -8,8 +8,17 @@ export const useProductStore = defineStore('products', () => {
   const storeCart: Ref<Nullable<Omit<Cart, 'refundable_amount' | 'refunded_total'>>> = ref(null);
 
   const fetchProducts = async () => {
-    const productsList = await useMedusaClient().products.list();
-    products.value = productsList.products;
+    if (!storeCart || !storeCart.value) {
+      await createCart();
+    }
+    if (storeCart && storeCart.value) {
+      const productsList = await useMedusaClient().products.list({
+        cart_id: storeCart.value.id,
+        region_id: storeCart.value.region_id,
+        currency_code: 'eur'
+      });
+      products.value = productsList.products;
+    }
   };
 
   const createCart = async () => {
@@ -19,7 +28,8 @@ export const useProductStore = defineStore('products', () => {
       const {cart} = await client.carts.retrieve(cart_id);
       storeCart.value = cart;
     } else {
-      const {cart} = await client.carts.create();
+      const {regions} = await client.regions.list();
+      const {cart} = await client.carts.create({region_id: regions[0].id});
       localStorage.setItem('cart_id', cart.id);
     }
   };
