@@ -23,9 +23,10 @@
     <CartDropDownItem v-for="(lineItem, index) in getLineItems" :key="index" :lineItem="lineItem"/>
 
 
-    <a href="#" title=""
-       class="mb-2 me-2 inline-flex w-full items-center justify-center rounded-lg bg-primary-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
-       role="button"> Proceed to Checkout </a>
+    <NuxtLink to="/warenkorb" title=""
+              class="mb-2 me-2 inline-flex w-full items-center justify-center rounded-lg bg-primary-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
+              role="button"> Zum Warenkorb
+    </NuxtLink>
   </div>
 </template>
 
