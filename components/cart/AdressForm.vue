@@ -1,5 +1,5 @@
 <template>
-  <form class="max-w-sm mx-auto">
+  <form class=" mx-auto">
 
     <div class="mb-5">
       <label for="firstName" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Vorname:</label>
