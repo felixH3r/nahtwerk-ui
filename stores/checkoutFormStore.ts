@@ -25,6 +25,17 @@ export const useFormStore = defineStore('form', () => {
   const gdpr = ref(false);
   const submitted = ref(false);
 
+  const $reset = () => {
+    submitted.value = false;
+    gdpr.value = false;
+    formData.firstName = '';
+    formData.lastName = '';
+    formData.email = '';
+    formData.street = '';
+    formData.city = '';
+    formData.postalCode = '';
+  };
+
   // Validation rules: form should not be empty and email should be valid
   const isValidEmail = computed(() => {
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -87,5 +98,6 @@ export const useFormStore = defineStore('form', () => {
     updateFormField,
     submitForm,
     isValidEmail,
+    $reset,
   };
 });

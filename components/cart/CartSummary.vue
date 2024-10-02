@@ -14,7 +14,7 @@
         </dl>
       </div>
 
-      <button @click="formStore.submitForm()"
+      <button @click="submitForm()"
               class="flex w-full items-center justify-center rounded-lg bg-primary-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">
         Jetzt
         Anfrage senden!
@@ -48,6 +48,16 @@
     return {};
   });
   const formStore = useFormStore();
+
+  const submitForm = async () => {
+    formStore.submitForm();
+    await store.completeCart();
+
+    localStorage.removeItem('cart_id');
+    store.$resetCart();
+    formStore.$reset();
+    navigateTo('/');
+  };
 </script>
 
 <style scoped>
