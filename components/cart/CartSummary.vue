@@ -55,28 +55,6 @@
     formStore.submitForm();
     await store.completeCart();
 
-    await emailClient_.emails.send({
-      from: "Nahtwerk <office@nahtwerk.at>",
-      to: formStore.formData.email,
-      subject: "Danke für deinen Einkauf!",
-      html: "Danke für deinen Einkauf bei Nahtwerk, ich melde mich in kürze bei dir!",
-    });
-
-    await emailClient_.emails.send({
-      from: "Nahtwerk <office@nahtwerk.at>",
-      to: "magdalena-s@gmx.at",
-      subject: "Neue Bestellung",
-      html: `
-          <h1>Neue Bestellung</h1>
-          <p> Schau in dein super cooles, vom besten Freund programmiertes Portal!</p>
-          <p> Kundenemail: ${formStore.formData.email}</p>
-          <p> Kundenname: ${formStore.formData.firstName} ${formStore.formData.lastName}</p>
-          <p> Straße: ${formStore.formData.street}</p>
-          <p> Stadt: ${formStore.formData.city}</p>
-          <p> PLZ: ${formStore.formData.postalCode}</p>
-        `,
-    });
-
     localStorage.removeItem('cart_id');
     store.$resetCart();
     formStore.$reset();
