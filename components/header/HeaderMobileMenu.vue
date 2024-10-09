@@ -10,7 +10,7 @@
         <!--        <a  class="hover:text-primary-700 dark:hover:text-primary-500">Shop</a>-->
       </li>
       <li>
-        <a href="#" class="hover:text-primary-700 dark:hover:text-primary-500">Über mich</a>
+        <NuxtLink to="/about-me" class="hover:text-primary-700 dark:hover:text-primary-500">Über mich</NuxtLink>
       </li>
     </ul>
   </div>

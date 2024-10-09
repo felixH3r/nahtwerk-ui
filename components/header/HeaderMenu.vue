@@ -27,10 +27,11 @@
         </NuxtLink>
       </li>
       <li class="shrink-0">
-        <a href="#" title=""
-           class="flex text-sm font-light text-gray-500 hover:text-primary-700 dark:text-white dark:hover:text-primary-500">
+        <NuxtLink to="/about-me" title=""
+                  class="flex text-sm font-light text-gray-500 hover:text-primary-700 dark:text-white dark:hover:text-primary-500"
+                  :class="{'font-medium text-gray-900': useRoute().fullPath===SLUGS.ABOUT_ME}">
           Über mich
-        </a>
+        </NuxtLink>
       </li>
     </ul>
   </div>
@@ -44,7 +45,7 @@
   enum SLUGS {
     HOME = '/',
     SHOP = '/shop',
-    ÜBER_MICH = '/über-mich'
+    ABOUT_ME = '/about-me'
   }
 
   onMounted(() => {
