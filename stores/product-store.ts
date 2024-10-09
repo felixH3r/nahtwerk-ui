@@ -16,12 +16,17 @@ export const useProductStore = defineStore('products', () => {
       await createCart();
     }
     if (storeCart && storeCart.value) {
-      const productsList = await useMedusaClient().products.list({
-        cart_id: storeCart.value.id,
-        region_id: storeCart.value.region_id,
-        currency_code: 'eur'
-      });
-      products.value = productsList.products;
+      try {
+        const productsList = await useMedusaClient().products.list({
+          cart_id: storeCart.value.id,
+          region_id: storeCart.value.region_id,
+          currency_code: 'eur'
+        });
+        products.value = productsList.products;
+      } catch (error) {
+        console.log(error);
+      }
+
     }
   };
 
@@ -29,8 +34,14 @@ export const useProductStore = defineStore('products', () => {
     const client = useMedusaClient();
     const cart_id = localStorage.getItem('cart_id');
     if (cart_id) {
-      const {cart} = await client.carts.retrieve(cart_id);
-      storeCart.value = cart;
+      try {
+        const {cart} = await client.carts.retrieve(cart_id);
+        storeCart.value = cart;
+      } catch (error) {
+        localStorage.removeItem('cart_id');
+        createCart();
+      }
+
     } else {
       const {regions} = await client.regions.list();
       const {cart} = await client.carts.create({region_id: regions[0].id});
