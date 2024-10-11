@@ -1,14 +1,13 @@
 <template>
 
-  <section class="py-14 lg:py-24 relative z-0 bg-primary-100">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative text-center">
+  <section class="py-14 lg:py-24 bg-primary-100">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
       <h1
           class="max-w-2xl mx-auto text-center font-manrope font-bold text-4xl  text-gray-900 mb-5 md:text-5xl md:leading-normal">
         Erfahre mehr über mich!
       </h1>
-      <p class="max-w-sm mx-auto text-center text-base font-normal leading-7 text-gray-500 mb-9">Invest
-        intelligently
-        and discover a better way to manage your entire wealth easily.</p>
+      <p class="max-w-sm mx-auto text-center text-base font-normal leading-7 text-gray-500 mb-9">Von Hand genäht, mit
+        Liebe gemacht – meine Geschichte</p>
 
 
     </div>
@@ -18,21 +17,23 @@
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative ">
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-9">
         <div class="img-box">
-          <img src="https://pagedone.io/asset/uploads/1702034769.png" alt="About Us tailwind page"
-               class="max-lg:mx-auto object-cover">
+          <NuxtImg
+              src="https://nahtwerk-uploads.s3.amazonaws.com/WhatsApp Image 2024-03-17 at 20.32.37-1728658625777.jpeg"
+              alt="About Us tailwind page"
+              class="max-lg:mx-auto aspect-square object-cover rounded-lg"></NuxtImg>
         </div>
         <div class="lg:pl-[100px] flex items-center">
           <div class="data w-full">
             <h2
                 class="font-manrope font-bold text-4xl lg:text-5xl text-black mb-9 max-lg:text-center relative">
-              About
-              Us </h2>
+              Eine Leidenschaft... </h2>
             <p class="font-normal text-xl leading-8 text-gray-500 max-lg:text-center max-w-2xl mx-auto">
-              Driven by a passion for seamless user experiences, we've meticulously curated pagedone
-              to empower creators, designers, and developers alike. Our mission is to provide a
-              comprehensive toolkit,
-              enabling you to build intuitive, beautiful interfaces that resonate with users on every
-              interaction.
+              Angetrieben von meiner Leidenschaft für handgefertigte Qualität habe ich mein kleines Unternehmen
+              gegründet, um Eltern und Babys einzigartige, liebevoll gefertigte Produkte zu bieten.
+              Mein Ziel ist es, durch sorgfältige Handarbeit und hochwertige Materialien schöne und praktische
+              Babyartikel zu schaffen, die nicht nur funktional sind, sondern auch Geborgenheit vermitteln.
+              Jedes Stück wird mit Hingabe gefertigt, damit es in jedem Detail den Bedürfnissen der Kleinsten gerecht
+              wird und die Eltern begeistert.
             </p>
           </div>
         </div>
@@ -48,15 +49,12 @@
           <div class="data w-full">
             <img src="https://pagedone.io/asset/uploads/1702034785.png" alt="About Us tailwind page"
                  class="block lg:hidden mb-9 mx-auto object-cover">
-            <h2 class="font-manrope font-bold text-4xl lg:text-5xl text-black mb-9 max-lg:text-center">We
-              are Creative Since 2005</h2>
+            <h2 class="font-manrope font-bold text-4xl lg:text-5xl text-black mb-9 max-lg:text-center">
+              Einzigartig...</h2>
             <p class="font-normal text-xl leading-8 text-gray-500 max-lg:text-center max-w-2xl mx-auto">
-              Pagedone isn’t just a collection of components and guidelines; it's a philosophy. We go
-              beyond aesthetics, prioritizing accessibility, scalability, and usability. Every element,
-              from the tiniest
-              detail to the grandest layout, is meticulously crafted to enhance functionality and elevate
-              user
-              satisfaction.
+              Mein Nähzimmer ist nicht nur ein Ort, an dem Produkte entstehen; es ist eine Leidenschaft. Jedes Stück,
+              von der feinsten Naht bis zum fertigen Produkt, wird mit größter Sorgfalt gefertigt, um die Funktionalität
+              und Einzigartigkeit zu maximieren (und sowohl Eltern als auch Babys glücklich zu machen.)
             </p>
           </div>
         </div>
@@ -75,39 +73,71 @@
         <div
             class="w-full max-lg:max-w-2xl mx-auto lg:mx-0 lg:w-1/3 bg-white p-6 rounded-2xl shadow-md shadow-gray-100">
           <div class="flex gap-5">
-            <div class="font-manrope text-2xl font-bold text-indigo-600">
-              240%
-            </div>
+            <svg class="w-10 h-10 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                 width="30" height="30" fill="currentColor" viewBox="0 0 24 24">
+              <path
+                  d="m12.75 20.66 6.184-7.098c2.677-2.884 2.559-6.506.754-8.705-.898-1.095-2.206-1.816-3.72-1.855-1.293-.034-2.652.43-3.963 1.442-1.315-1.012-2.678-1.476-3.973-1.442-1.515.04-2.825.76-3.724 1.855-1.806 2.201-1.915 5.823.772 8.706l6.183 7.097c.19.216.46.34.743.34a.985.985 0 0 0 .743-.34Z"/>
+            </svg>
+
             <div class="flex-1">
               <h4 class="text-xl text-gray-900 font-semibold mb-2">Nähen aus Leidenschaft</h4>
-              <p class="text-xs text-gray-500 leading-5">Company's remarkable growth journey as we
-                continually innovate and drive towards new heights of success.</p>
+              <p class="text-xs text-gray-500 leading-5">Seit Jahren nähe ich mit Herz und Seele individuelle
+                Baby-Kleidung, die nicht nur praktisch, sondern auch liebevoll gestaltet ist.</p>
             </div>
           </div>
         </div>
         <div
             class="w-full max-lg:max-w-2xl mx-auto lg:mx-0 lg:w-1/3 bg-white p-6 rounded-2xl shadow-md shadow-gray-100">
           <div class="flex gap-5">
-            <div class="font-manrope text-2xl font-bold text-indigo-600">
-              175+
-            </div>
+            <svg class="w-10 h-10" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                 xmlns="http://www.w3.org/2000/svg">
+              <path
+                  d="M17 21L20.3282 16.0077C20.6616 15.5075 20.8284 15.2574 20.9142 14.974C21 14.6906 21 14.39 21 13.7889V9.5C21 8.67157 20.3284 8 19.5 8C18.6716 8 18 8.67157 18 9.5V12.6667C18 13.3275 18 13.6579 17.8974 13.9658C17.7947 14.2737 17.5965 14.538 17.2 15.0667L16.5 16"
+                  stroke="black" stroke-width="2" stroke-linecap="round" class="my-path"></path>
+              <path
+                  d="M7 21L3.6718 16.0077C3.33835 15.5075 3.17163 15.2574 3.08582 14.974C3 14.6906 3 14.39 3 13.7889V9.5C3 8.67157 3.67157 8 4.5 8C5.32843 8 6 8.67157 6 9.5V12.6667C6 13.3275 6 13.6579 6.10263 13.9658C6.20527 14.2737 6.40351 14.538 6.8 15.0667L7.5 16"
+                  stroke="black" stroke-width="2" stroke-linecap="round" class="my-path"></path>
+              <path
+                  d="M14 20.9996V17.1227C14 15.703 14 14.9931 14.2986 14.5099C14.5496 14.1036 14.9377 13.8005 15.3928 13.6555C15.934 13.4831 16.1227 13.6557 17.5 14"
+                  stroke="black" stroke-width="2" stroke-linecap="round" class="my-path"></path>
+              <path
+                  d="M10.0005 21.0002V17.1233C10.0005 15.7036 10.0005 14.9937 9.70195 14.5105C9.45091 14.1042 9.06278 13.8011 8.60774 13.6561C8.06652 13.4837 7.87733 13.6557 6.5 14"
+                  stroke="black" stroke-width="2" stroke-linecap="round" class="my-path"></path>
+              <path
+                  d="M13.3346 5.66667V3.66667C13.3346 3.29848 13.0362 3 12.668 3H11.3346C10.9664 3 10.668 3.29848 10.668 3.66667V5.66667"
+                  stroke="black" stroke-width="2" stroke-linecap="round" class="my-path"></path>
+              <path
+                  d="M10.666 8.3335V10.3335C10.666 10.7017 10.9645 11.0002 11.3327 11.0002L12.666 11.0002C13.0342 11.0002 13.3327 10.7017 13.3327 10.3335L13.3327 8.3335"
+                  stroke="black" stroke-width="2" stroke-linecap="round" class="my-path"></path>
+              <path
+                  d="M13.334 8.33366H15.334C15.7022 8.33366 16.0007 8.03518 16.0007 7.66699V6.33366C16.0007 5.96547 15.7022 5.66699 15.334 5.66699H13.334"
+                  stroke="black" stroke-width="2" stroke-linecap="round" class="my-path"></path>
+              <path
+                  d="M10.6667 5.6665H8.66667C8.29848 5.6665 8 5.96498 8 6.33317V7.6665C8 8.03469 8.29848 8.33317 8.66667 8.33317L10.6667 8.33317"
+                  stroke="black" stroke-width="2" stroke-linecap="round" class="my-path"></path>
+            </svg>
             <div class="flex-1">
               <h4 class="text-xl text-gray-900 font-semibold mb-2">Erfahrung als Physiotherapeutin</h4>
-              <p class="text-xs text-gray-500 leading-5">Our very talented team members are the powerhouse
-                of pagedone and pillars of our success. </p>
+              <p class="text-xs text-gray-500 leading-5">Meine Erfahrung als Physiotherapeutin hat mir ein besonderes
+                Gespür für die Bedürfnisse von Babys und Kleinkindern gegeben – Komfort und Wohlbefinden stehen immer im
+                Mittelpunkt meiner Arbeit.</p>
             </div>
           </div>
         </div>
         <div
             class="w-full max-lg:max-w-2xl mx-auto lg:mx-0 lg:w-1/3 bg-white p-6 rounded-2xl shadow-md shadow-gray-100">
           <div class="flex gap-5">
-            <div class="font-manrope text-2xl font-bold text-indigo-600">
-              625+
-            </div>
+            <svg class="w-10 h-10" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                 xmlns="http://www.w3.org/2000/svg">
+              <path
+                  d="M10.512 6.85387C11.2957 4.44185 11.6876 3.23584 12.4141 3.23584C13.1406 3.23584 13.5325 4.44185 14.3162 6.85387L14.6592 7.9096C14.8759 8.57627 14.9842 8.9096 15.247 9.10058C15.5099 9.29157 15.8604 9.29157 16.5614 9.29157H17.6969C20.2549 9.29157 21.534 9.29157 21.7571 9.98531C21.9803 10.6791 20.9412 11.4248 18.863 12.9164L17.9611 13.5637C17.3883 13.9748 17.1019 14.1803 17.0001 14.4906C16.8983 14.8008 17.0073 15.1361 17.2251 15.8066L17.5654 16.8539C18.3491 19.2659 18.741 20.4719 18.1532 20.899C17.5654 21.326 16.5395 20.5807 14.4877 19.0899L13.5897 18.4375C13.0226 18.0254 12.739 17.8194 12.4141 17.8194C12.0892 17.8194 11.8056 18.0254 11.2385 18.4375L10.3405 19.0899C8.28869 20.5807 7.2628 21.326 6.67501 20.899C6.08723 20.4719 6.47908 19.2659 7.2628 16.8539L7.60582 15.7981C7.82244 15.1315 7.93074 14.7981 7.83034 14.4891C7.72993 14.1801 7.44638 13.9741 6.87928 13.5621L5.98123 12.9096C3.92944 11.4189 2.90354 10.6735 3.12805 9.98255C3.35257 9.29157 4.62064 9.29157 7.1568 9.29157H8.26685C8.96783 9.29157 9.31832 9.29157 9.58118 9.10058C9.84405 8.9096 9.95235 8.57627 10.169 7.9096L10.512 6.85387Z"
+                  stroke="black" stroke-width="2" class="my-path"></path>
+            </svg>
             <div class="flex-1">
               <h4 class="text-xl text-gray-900 font-semibold mb-2">Auge für Details</h4>
-              <p class="text-xs text-gray-500 leading-5">We have accomplished more than 625 projects
-                worldwide and we are still counting many more.</p>
+              <p class="text-xs text-gray-500 leading-5">Jedes einzelne Kleidungsstück entsteht mit viel Liebe zum
+                Detail – von den Materialien bis hin zur Verarbeitung, damit es perfekt für die empfindliche Haut der
+                Kleinsten ist.</p>
             </div>
           </div>
         </div>
