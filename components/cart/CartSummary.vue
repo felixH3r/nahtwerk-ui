@@ -4,16 +4,14 @@
         class="space-y-4 rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800 sm:p-6">
       <p class="text-xl font-semibold text-gray-900 dark:text-white">Adresse:</p>
       <AdressForm/>
-      <div class="space-y-4">
-
-
+      <div class="space-y-4 mb-5">
         <dl class="flex items-center justify-between gap-4 border-t border-gray-200 pt-2 dark:border-gray-700">
           <dt class="text-base font-bold text-gray-900 dark:text-white">Summe:</dt>
           <dd class="text-base font-bold text-gray-900 dark:text-white">€ {{ formatPrice(getCart.total) }}
           </dd>
         </dl>
       </div>
-
+      <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Bitte beachten Sie, dass dies noch keine verbindliche Bestellung ist. Ich werde Ihre Anfrage umgehend prüfen und mich in Kürze bei Ihnen melden, um alle Details zu besprechen.</span>
       <button @click="submitForm()"
               class="flex w-full items-center justify-center rounded-lg bg-primary-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">
         Jetzt

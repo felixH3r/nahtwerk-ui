@@ -10,10 +10,10 @@
           <NuxtLink to="/" class="mr-4 hover:underline md:mr-6 ">Über mich</NuxtLink>
         </li>
         <li>
-          <a href="#" class="mr-4 hover:underline md:mr-6">Impressum</a>
+          <NuxtLink to="/impressum" class="mr-4 hover:underline md:mr-6">Impressum</NuxtLink>
         </li>
         <li>
-          <a href="#" class="mr-4 hover:underline md:mr-6 ">Datenschutz</a>
+          <NuxtLink to="/datenschutz" class="mr-4 hover:underline md:mr-6 ">Datenschutz</NuxtLink>
         </li>
         <li>
           <NuxtLink to="https://www.instagram.com/nahtwerk_/" target="_blank" class="mr-4 hover:underline md:mr-6 ">
