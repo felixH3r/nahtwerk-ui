@@ -24,15 +24,15 @@
               lineItem.title
             }}
           </NuxtLink>
-          <a class="text-sm font-light text-gray-900 hover:underline dark:text-white">Größe: {{
+          <span class="text-sm font-light text-gray-900 hover:underline dark:text-white">Größe: {{
               lineItem.variant.title
-            }}</a>
-          <a href="#" class="text-sm font-light text-gray-900 hover:underline dark:text-white">Innenstoff: {{
+            }}</span>
+          <span class="text-sm font-light text-gray-900 hover:underline dark:text-white">Innenstoff: {{
               lineItem.metadata.innerFabric.fabricName
-            }}</a>
-          <a href="#" class="text-sm font-light text-gray-900 hover:underline dark:text-white">Außenstoff: {{
+            }}</span>
+          <span class="text-sm font-light text-gray-900 hover:underline dark:text-white">Außenstoff: {{
               lineItem.metadata.outerFabric.fabricName
-            }}</a>
+            }}</span>
         </div>
 
 

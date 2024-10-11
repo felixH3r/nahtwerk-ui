@@ -1,7 +1,8 @@
 <template>
   <div class="flex w-full overflow-scroll md:h-56">
-    <div class="flex gap-2 pr-16">
+    <div class="flex gap-2 pr-64">
       <slot></slot>
+      <div class="w-20 flex-shrink-0"></div>
     </div>
     <div
         :class="heightClass"
