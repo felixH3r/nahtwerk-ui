@@ -6,6 +6,12 @@ export default defineNuxtConfig({
   pinia: {
     storesDirs: ['./stores/**', './custom-folder/stores/**'],
   },
-  // @ts-ignore
-  // isr: true
+  
+  // ISR configuration
+  nitro: {
+    prerender: {
+      crawlLinks: true,
+      routes: ['/'],
+    }
+  },
 });
