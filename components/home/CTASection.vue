@@ -1,12 +1,12 @@
 <template>
   <section class="dark:bg-gray-900 pb-10">
     <div class="gap-8 items-center py-8 px-4 mx-auto max-w-screen-xl xl:gap-16 md:grid md:grid-cols-2 sm:py-16 lg:px-6">
-      <img class="w-full dark:hidden"
-           src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/cta/cta-dashboard-mockup.svg"
-           alt="dashboard image">
-      <img class="w-full hidden dark:block"
-           src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/cta/cta-dashboard-mockup-dark.svg"
-           alt="dashboard image">
+      <NuxtImg loading="lazy" class="w-full rounded-lg"
+               src="https://plattenshop-uploads.s3.eu-central-1.amazonaws.com/WhatsApp+Image+2024-11-26+at+09.55.02.jpeg"
+               alt="dashboard image"></NuxtImg>
+      <!--      <img class="w-full hidden dark:block"-->
+      <!--           src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/cta/cta-dashboard-mockup-dark.svg"-->
+      <!--           alt="dashboard image">-->
       <div class="mt-4 md:mt-0">
         <h2 class="mb-4 text-4xl tracking-tight font-extrabold text-gray-900 dark:text-white">Lass uns zusammen die
           perfekte Babykleidung schaffen!</h2>
@@ -18,7 +18,7 @@
 
           Entdecke handgefertigte Babymode, die ebenso schön wie praktisch ist. Ich freue mich darauf, dein Baby in
           Nahtwerk einzukleiden!</p>
-        <a href="#"
+        <a href="/shop"
            class="inline-flex items-center text-white bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:focus:ring-primary-900">
           Jetzt entdecken!
           <svg class="ml-2 -mr-1 w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">

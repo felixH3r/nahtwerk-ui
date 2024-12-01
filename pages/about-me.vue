@@ -18,7 +18,7 @@
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-9">
         <div class="img-box">
           <NuxtImg
-              src="https://nahtwerk-uploads.s3.amazonaws.com/WhatsApp Image 2024-03-17 at 20.32.37-1728658625777.jpeg"
+              src="https://plattenshop-uploads.s3.eu-central-1.amazonaws.com/WhatsApp+Image+2024-11-27+at+12.59.51.jpeg"
               alt="About Us tailwind page"
               class="max-lg:mx-auto aspect-square object-cover rounded-lg"></NuxtImg>
         </div>
@@ -47,8 +47,10 @@
 
         <div class="lg:pr-24 flex items-center">
           <div class="data w-full">
-            <img src="https://pagedone.io/asset/uploads/1702034785.png" alt="About Us tailwind page"
-                 class="block lg:hidden mb-9 mx-auto object-cover">
+            <NuxtImg
+                src="https://plattenshop-uploads.s3.eu-central-1.amazonaws.com/WhatsApp+Image+2024-11-27+at+11.51.16+(2).jpeg"
+                alt="About Us tailwind page"
+                class="block lg:hidden mb-9 mx-auto object-cover"></NuxtImg>
             <h2 class="font-manrope font-bold text-4xl lg:text-5xl text-black mb-9 max-lg:text-center">
               Einzigartig...</h2>
             <p class="font-normal text-xl leading-8 text-gray-500 max-lg:text-center max-w-2xl mx-auto">
@@ -58,9 +60,11 @@
             </p>
           </div>
         </div>
-        <div class="img-box ">
-          <img src="https://pagedone.io/asset/uploads/1702034785.png" alt="About Us tailwind page"
-               class="hidden lg:block object-cover">
+        <div class="img-box flex items-center justify-end">
+          <NuxtImg
+              src="https://plattenshop-uploads.s3.eu-central-1.amazonaws.com/WhatsApp+Image+2024-11-27+at+11.51.16+(2).jpeg"
+              alt="About Us tailwind page"
+              class="hidden lg:block object-cover rounded-lg max-w-[400px]"></NuxtImg>
         </div>
       </div>
     </div>
@@ -153,8 +157,10 @@
       <div
           class="group w-full flex-wrap flex items-center justify-center gap-8  transition-all duration-500 p-8  lg:flex-nowrap">
         <div class=" w-full lg:w-48 h-64">
-          <img src="https://pagedone.io/asset/uploads/1696238786.png" alt="image"
-               class="rounded-2xl h-full object-cover mx-auto lg:mx-0 lg:w-full">
+          <NuxtImg
+              src="https://plattenshop-uploads.s3.eu-central-1.amazonaws.com/WhatsApp+Image+2024-11-26+at+09.54.00.jpeg"
+              alt="image"
+              class="rounded-2xl h-full object-cover mx-auto lg:mx-0 lg:w-full"></NuxtImg>
         </div>
         <div class="text-center lg:text-left lg:max-w-xs flex-1">
           <div class="mb-5 pb-5 border-b border-solid border-gray-300">

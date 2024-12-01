@@ -21,10 +21,10 @@
       </div>
       <div class="grid grid-cols-2 gap-4 mt-8">
         <img class="w-full rounded-lg"
-             src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/content/office-long-2.png"
+             src="https://plattenshop-uploads.s3.eu-central-1.amazonaws.com/WhatsApp+Image+2024-11-27+at+12.01.02+(1).jpeg"
              alt="office content 1">
         <img class="mt-4 w-full lg:mt-10 rounded-lg"
-             src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/content/office-long-1.png"
+             src="https://plattenshop-uploads.s3.eu-central-1.amazonaws.com/WhatsApp+Image+2024-11-27+at+11.51.16+(1).jpeg"
              alt="office content 2">
       </div>
     </div>
