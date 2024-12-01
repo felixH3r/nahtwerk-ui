@@ -50,7 +50,7 @@
             <NuxtImg
                 src="https://plattenshop-uploads.s3.eu-central-1.amazonaws.com/WhatsApp+Image+2024-11-27+at+11.51.16+(2).jpeg"
                 alt="About Us tailwind page"
-                class="block lg:hidden mb-9 mx-auto object-cover"></NuxtImg>
+                class="block lg:hidden mb-9 mx-auto object-cover rounded-2xl"></NuxtImg>
             <h2 class="font-manrope font-bold text-4xl lg:text-5xl text-black mb-9 max-lg:text-center">
               Einzigartig...</h2>
             <p class="font-normal text-xl leading-8 text-gray-500 max-lg:text-center max-w-2xl mx-auto">
