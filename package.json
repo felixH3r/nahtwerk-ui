@@ -12,13 +12,14 @@
   },
   "dependencies": {
     "@nuxt/image": "^1.7.0",
+    "@nuxtjs/seo": "^2.0.2",
     "@pinia/nuxt": "^0.5.2",
     "flowbite": "^2.4.1",
     "nuxt": "^3.12.3",
     "pinia": "^2.2.0",
     "prettier": "^3.3.3",
-    "vue": "latest",
-    "resend": "^2.0.0"
+    "resend": "^2.0.0",
+    "vue": "latest"
   },
   "devDependencies": {
     "@flydotio/dockerfile": "^0.5.8",
