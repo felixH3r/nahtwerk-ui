@@ -1,16 +1,19 @@
 <template>
-  <section class="py-8 bg-white md:py-16 dark:bg-gray-900 antialiased">
+  <section class="py-8 md:py-16 dark:bg-gray-900 antialiased">
     <div class="max-w-screen-xl px-4 mx-auto 2xl:px-0">
       <div class="lg:grid lg:grid-cols-2 lg:gap-8 xl:gap-16">
-        <ProductImage :product="product"/>
+        <div class="z-[-1]">
+          <ProductImage :product="product" class="sticky top-24"/>
+        </div>
 
-        <div class="mt-6 sm:mt-8 lg:mt-0">
+
+        <div class=" mt-6 sm:mt-8 lg:mt-0">
           <h1
-              class="text-xl font-semibold text-gray-900 sm:text-2xl dark:text-white"
+              class="text-4xl font-semibold text-gray-900dark:text-white"
           >
             {{ product?.title }}
           </h1>
-          <div class="mt-4 sm:items-center sm:gap-4 sm:flex">
+          <div class="mt-4 mb-8 sm:items-center sm:gap-4 sm:flex">
             <p
                 class="text-2xl font-extrabold text-gray-900 sm:text-3xl dark:text-white"
             >
@@ -19,9 +22,9 @@
           </div>
 
           <!-- Innerfabric Gallery -->
-          <div>
-            <h2 class="text-lg font-medium">Innenstoff:</h2>
-            <Slider :height-class="'h-20'">
+          <div class="mb-8">
+            <h2 class="mb-4 text-xl font-bold">Innenstoff:</h2>
+            <FabricGrid>
               <FabricThumbnail
                   v-for="(fabric, index) in product?.metadata?.innerFabrics"
                   :key="index"
@@ -30,14 +33,14 @@
                   :isSelected="selectedInnerFabricIndex === index"
                   :onSelect="selectInnerFabric"
               />
-            </Slider>
+            </FabricGrid>
           </div>
 
           <!-- Outerfabric Gallery -->
-          <div>
-            <h2 class="text-lg font-medium">Außenstoff:</h2>
+          <div class="mb-8">
+            <h2 class="mb-4 text-xl font-bold">Außenstoff:</h2>
 
-            <Slider :height-class="'h-20'">
+            <FabricGrid>
               <FabricThumbnail
                   v-for="(fabric, index) in product?.metadata?.outerFabrics"
                   :key="index"
@@ -46,13 +49,13 @@
                   :isSelected="selectedOuterFabricIndex === index"
                   :onSelect="selectOuterFabric"
               />
-            </Slider>
+            </FabricGrid>
           </div>
 
           <!-- Variants Gallery -->
-          <div>
-            <h2 class="text-lg font-medium">Größe:</h2>
-            <Slider class="w-full" :height-class="'h-20'">
+          <div class="mb-8">
+            <h2 class="mb-4 text-xl font-bold">Größe:</h2>
+            <FabricGrid>
               <VariantsThumbnail
                   v-for="(variant, index) in product?.variants"
                   :key="index"
@@ -61,7 +64,7 @@
                   :isSelected="selectedVariantIndex === index"
                   :onSelect="selectVariant"
               />
-            </Slider>
+            </FabricGrid>
           </div>
 
           <p class="mb-6 text-gray-500 dark:text-gray-400">
@@ -108,9 +111,9 @@
   import type {PricedProduct, PricedVariant,} from "@medusajs/medusa/dist/types/pricing";
   import VariantsThumbnail from "~/components/product/VariantsThumbnail.vue";
   import FabricThumbnail from "~/components/product/FabricThumbnail.vue";
-  import Slider from "~/components/utils/Slider.vue";
   import ProductImage from "~/components/product/ProductImage.vue";
   import {formatPrice} from "~/utils/utils";
+  import FabricGrid from "~/components/product/FabricGrid.vue";
 
   const route = useRoute();
   const product: Ref<Nullable<PricedProduct>> = ref(null);
@@ -173,6 +176,7 @@
   };
 
   onMounted(async () => {
+
     if (!products.value) {
       await store.fetchProducts();
     }
@@ -189,4 +193,7 @@
   });
 </script>
 
-<style scoped></style>
+<style scoped>
+
+
+</style>

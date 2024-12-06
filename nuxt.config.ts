@@ -1,4 +1,5 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+
 export default defineNuxtConfig({
   app: {
     head: {
@@ -16,6 +17,11 @@ export default defineNuxtConfig({
         },
         {name: 'format-detection', content: 'telephone=no'},
       ],
+      link: [
+        {rel: 'icon', type: 'image/x-icon', href: '/favicon.ico'},
+      ],
+      // Move script to public directory instead of _nuxt
+      script: []
     },
   },
   compatibilityDate: '2024-04-03',
@@ -31,5 +37,5 @@ export default defineNuxtConfig({
       crawlLinks: true,
       routes: ['/'],
     }
-  },
+  }
 });
