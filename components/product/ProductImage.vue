@@ -1,6 +1,9 @@
 <template>
-  <div class="shrink-0 max-w-md lg:max-w-lg mx-auto z-[-1]">
-    <NuxtImg class="w-full h-96 rounded-lg mb-3 object-cover " :src="getSelectedImage"/>
+  <div class="shrink-0 max-w-md lg:max-w-lg mx-auto relative">
+    <div class="z-[-1] relative">
+      <NuxtImg class="w-full max-h-[500px] rounded-lg mb-3 object-cover" :src="getSelectedImage"/>
+    </div>
+
     <Slider :height-class="'h-32'">
       <MediaThumbnail
           v-for="(imageUrl, index) in getImagesWithThumbnail"
