@@ -2,7 +2,7 @@
   <section class="py-8 md:py-16 dark:bg-gray-900 antialiased">
     <div class="max-w-screen-xl px-4 mx-auto 2xl:px-0">
       <div class="lg:grid lg:grid-cols-2 lg:gap-8 xl:gap-16">
-        <div class=" ">
+        <div>
           <ProductImage :product="product" class="sticky top-24"/>
         </div>
 
@@ -22,8 +22,9 @@
           </div>
 
           <!-- Innerfabric Gallery -->
-          <div class="mb-8">
-            <h2 class="mb-4 text-xl font-bold">Innenstoff:</h2>
+          <div class="mb-8" v-if="product?.metadata?.innerFabrics.length > 0">
+            <h2 class="mb-4 text-xl font-bold">
+              {{ product?.metadata.outerFabrics.length > 0 ? 'Innenstoff:' : 'Stoff:' }}</h2>
             <FabricGrid>
               <FabricThumbnail
                   v-for="(fabric, index) in product?.metadata?.innerFabrics"
@@ -37,7 +38,7 @@
           </div>
 
           <!-- Outerfabric Gallery -->
-          <div class="mb-8">
+          <div class="mb-8" v-if="product?.metadata?.outerFabrics.length >0">
             <h2 class="mb-4 text-xl font-bold">Außenstoff:</h2>
 
             <FabricGrid>
@@ -167,10 +168,10 @@
   };
 
   const addToCart = async () => {
-    if (selectedVariant.value && selectedVariant.value.id && selectedInnerFabric.value && selectedOuterFabric.value) {
+    if (selectedVariant.value && selectedVariant.value.id) {
       await store.addToCart(selectedVariant.value.id, {
-        innerFabric: selectedInnerFabric.value,
-        outerFabric: selectedOuterFabric.value
+        innerFabric: selectedInnerFabric.value ? selectedInnerFabric.value : {fileUrl: '-', fabricName: '-'},
+        outerFabric: selectedOuterFabric.value ? selectedOuterFabric.value : {fileUrl: '-', fabricName: '-'}
       });
     }
   };

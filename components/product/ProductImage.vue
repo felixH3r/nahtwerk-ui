@@ -1,7 +1,7 @@
 <template>
   <div class="shrink-0 max-w-md lg:max-w-lg mx-auto relative">
     <div class="z-[-1] relative">
-      <NuxtImg class="w-full max-h-[500px] rounded-lg mb-3 object-cover" :src="getSelectedImage"/>
+      <NuxtImg class="w-full max-h-[500px] rounded-lg mb-3 object-cover z-[-1]" :src="getSelectedImage"/>
     </div>
 
     <Slider :height-class="'h-32'">

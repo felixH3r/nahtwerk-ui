@@ -56,7 +56,7 @@
     localStorage.removeItem('cart_id');
     store.$resetCart();
     formStore.$reset();
-    navigateTo('/');
+    navigateTo('/danke');
   };
 </script>
 

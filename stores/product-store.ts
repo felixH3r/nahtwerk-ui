@@ -52,8 +52,18 @@ export const useProductStore = defineStore('products', () => {
   const addToCart = async (variant_id: string, metadata: { innerFabric: Fabric, outerFabric: Fabric }) => {
     const client = useMedusaClient();
     if (storeCart.value) {
-      const {cart} = await client.carts.lineItems.create(storeCart.value.id, {variant_id, quantity: 1, metadata});
-      storeCart.value = cart;
+      try {
+        const {cart, response} = await client.carts.lineItems.create(storeCart.value.id, {
+          variant_id,
+          quantity: 1,
+          metadata
+        });
+        storeCart.value = cart;
+      } catch (err: any) {
+        alert(err.response.data.message);
+      }
+
+
     }
   };
 

@@ -1,6 +1,6 @@
 <template>
   <div class="flex items-center space-x-8">
-    <div class="shrink-0">
+    <div class="shrink-0 ">
       <NuxtLink to="/">
         <img class="block w-auto h-16 dark:hidden"
              src="https://nahtwerk-uploads.s3.amazonaws.com/Nahtwerk_logo.png" alt="">
