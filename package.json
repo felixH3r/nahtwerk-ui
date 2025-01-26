@@ -20,7 +20,7 @@
     "pinia": "^2.2.0",
     "prettier": "^3.3.3",
     "resend": "^2.0.0",
-    "vue": "latest"
+    "vue": "3.5.13"
   },
   "devDependencies": {
     "@flydotio/dockerfile": "^0.5.8",
@@ -28,6 +28,6 @@
     "nuxt-medusa": "^0.5.0"
   },
   "overrides": {
-    "vue": "latest"
+    "vue": "3.5.13"
   }
 }
