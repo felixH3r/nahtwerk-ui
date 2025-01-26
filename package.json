@@ -15,7 +15,7 @@
     "@nuxtjs/seo": "^2.0.2",
     "@pinia/nuxt": "^0.5.2",
     "flowbite": "^2.4.1",
-    "nuxt": "3.12.3",
+    "nuxt": "^3.12.3",
     "pinia": "^2.2.0",
     "prettier": "^3.3.3",
     "resend": "^2.0.0",
