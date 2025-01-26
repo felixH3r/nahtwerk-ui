@@ -14,7 +14,6 @@
     "@nuxt/image": "^1.7.0",
     "@nuxtjs/seo": "^2.0.2",
     "@pinia/nuxt": "^0.5.2",
-    "@vercel/analytics": "^1.4.1",
     "flowbite": "^2.4.1",
     "nuxt": "3.12.3",
     "pinia": "^2.2.0",
