@@ -1,10 +1,10 @@
-import { Y as decodeHtml, Z as logger, m as useNitroOrigin, _ as toBase64Image, W as withBase, a0 as createConsola, q as fetchIsland, a1 as htmlDecodeQuotes, o as useOgImageRuntimeConfig, K as defu, s as normaliseFontInput, a2 as fontCache } from '../nitro/nitro.mjs';
-import { t as theme, a as applyEmojis, l as loadFont } from './eventHandlers.mjs';
+import { Y as decodeHtml, Z as logger, n as useNitroOrigin, _ as toBase64Image, X as withBase, a0 as createConsola, s as fetchIsland, a1 as htmlDecodeQuotes, q as useOgImageRuntimeConfig, L as defu, v as theme, a2 as sendError, t as normaliseFontInput, a3 as fontCache } from '../nitro/nitro.mjs';
+import { a as applyEmojis, l as loadFont } from './eventHandlers.mjs';
 import { html } from 'satori-html';
 import sizeOf from 'image-size';
-import { createGenerator } from '@unocss/core';
-import presetWind from '@unocss/preset-wind';
 import 'lru-cache';
+import '@unocss/core';
+import '@unocss/preset-wind';
 import 'devalue';
 import 'node:http';
 import 'node:https';
@@ -32,11 +32,11 @@ async function useSatori() {
   return satoriInstance.instance.satori;
 }
 async function useSharp() {
-  sharpInstance.instance = sharpInstance.instance || await import('../nitro/nitro.mjs').then(function (n) { return n.a7; }).then((m) => m.default);
+  sharpInstance.instance = sharpInstance.instance || await import('../nitro/nitro.mjs').then(function (n) { return n.a8; }).then((m) => m.default);
   return sharpInstance.instance;
 }
 async function useCssInline() {
-  cssInlineInstance.instance = cssInlineInstance.instance || await import('../nitro/nitro.mjs').then(function (n) { return n.a7; }).then((m) => m.default);
+  cssInlineInstance.instance = cssInlineInstance.instance || await import('../nitro/nitro.mjs').then(function (n) { return n.a8; }).then((m) => m.default);
   await cssInlineInstance.instance.initWasmPromise;
   return cssInlineInstance.instance.cssInline;
 }
@@ -191,7 +191,7 @@ const imageSrc = defineSatoriTransformer([
   // fix <img src="">
   {
     filter: (node) => node.type === "img" && node.props?.src,
-    transform: async (node, { e, publicStoragePath }) => {
+    transform: async (node, { e, publicStoragePath, runtimeConfig }) => {
       const src = node.props.src;
       const isRelative = src.startsWith("/");
       let dimensions;
@@ -200,12 +200,16 @@ const imageSrc = defineSatoriTransformer([
         logger.warn("Using WebP images with Satori is not supported. Please consider switching image format or use the chromium renderer.", src);
       }
       if (isRelative) {
-        {
-          imageBuffer = await e.$fetch(src, {
-            baseURL: useNitroOrigin(e),
-            responseType: "arrayBuffer"
-          }).catch(() => {
+        if (!imageBuffer) {
+          imageBuffer = await e.$fetch(src, { responseType: "arrayBuffer" }).catch(() => {
           });
+          if (!imageBuffer && true) {
+            imageBuffer = await e.$fetch(src, {
+              baseURL: useNitroOrigin(e),
+              responseType: "arrayBuffer"
+            }).catch(() => {
+            });
+          }
         }
         if (imageBuffer)
           node.props.src = toBase64Image(imageBuffer);
@@ -245,7 +249,7 @@ const imageSrc = defineSatoriTransformer([
   // fix style="background-image: url('')"
   {
     filter: (node) => node.props?.style?.backgroundImage?.includes("url("),
-    transform: async (node, { e, publicStoragePath }) => {
+    transform: async (node, { e, publicStoragePath, runtimeConfig }) => {
       const backgroundImage = node.props.style.backgroundImage;
       const src = backgroundImage.replace(/^url\(['"]?/, "").replace(/['"]?\)$/, "");
       const isRelative = src?.startsWith("/");
@@ -258,19 +262,14 @@ const imageSrc = defineSatoriTransformer([
   }
 ]);
 
-const uno = createGenerator({ theme }, {
-  presets: [
-    presetWind()
-  ]
-});
 const unocss = defineSatoriTransformer({
   filter: (node) => !!node.props?.class,
-  transform: async (node) => {
+  transform: async (node, ctx) => {
     const classes = node.props.class || "";
     const styles = node.props.style || {};
     const replacedClasses = /* @__PURE__ */ new Set();
     for (const token of classes.split(" ").filter((c) => c.trim())) {
-      const parsedToken = await uno.parseToken(token);
+      const parsedToken = await ctx.unocss.parseToken(token);
       if (parsedToken) {
         const inlineStyles = parsedToken[0][2].split(";").filter((s) => !!s?.trim());
         const vars = {
@@ -411,7 +410,9 @@ async function createSvg(event) {
     width: options.width,
     height: options.height
   });
-  return satori(vnodes, satoriOptions);
+  return satori(vnodes, satoriOptions).catch((err) => {
+    return sendError(event.e, err, false);
+  });
 }
 async function createPng(event) {
   const { resvgOptions } = useOgImageRuntimeConfig();
@@ -443,9 +444,13 @@ const SatoriRenderer = {
     }
   },
   async debug(e) {
+    const [vnodes, svg] = await Promise.all([
+      createVNodes(e),
+      createSvg(e)
+    ]);
     return {
-      vnodes: await createVNodes(e),
-      svg: await createSvg(e)
+      vnodes,
+      svg
     };
   }
 };

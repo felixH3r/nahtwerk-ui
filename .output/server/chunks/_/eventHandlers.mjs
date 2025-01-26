@@ -1,8 +1,6 @@
-import process from 'node:process';globalThis._importMeta_=globalThis._importMeta_||{url:"file:///_entry.js",env:process.env};import { k as prefixStorage, l as useStorage, m as useNitroOrigin, n as emojiCache, o as useOgImageRuntimeConfig, c as createError, q as fetchIsland, s as normaliseFontInput, w as withTrailingSlash, g as getQuery, t as handleCacheHeaders, v as setHeaders, x as setHeader, y as hash, z as parseURL, A as setResponseHeader, B as proxyRequest, C as sendRedirect, D as resolveContext, H as H3Error } from '../nitro/nitro.mjs';
+import process from 'node:process';globalThis._importMeta_=globalThis._importMeta_||{url:"file:///_entry.js",env:process.env};import { l as prefixStorage, m as useStorage, n as useNitroOrigin, o as emojiCache, q as useOgImageRuntimeConfig, c as createError, s as fetchIsland, t as normaliseFontInput, v as theme, w as withTrailingSlash, g as getQuery, x as handleCacheHeaders, y as setHeaders, z as setHeader, h as hash, A as parseURL, B as setResponseHeader, C as proxyRequest, D as sendRedirect, E as resolveContext, H as H3Error } from '../nitro/nitro.mjs';
 import { renderSSRHead } from '@unhead/ssr';
 import { createHeadCore } from 'unhead';
-
-const theme = {"fontFamily":{"body":["Montserrat","ui-sans-serif","system-ui","-apple-system","system-ui","Segoe UI","Roboto","Helvetica Neue","Arial","Noto Sans","sans-serif","Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji","Montserrat","ui-sans-serif","system-ui","-apple-system","system-ui","Segoe UI","Roboto","Helvetica Neue","Arial","Noto Sans","sans-serif","Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji","Montserrat","ui-sans-serif","system-ui","-apple-system","system-ui","Segoe UI","Roboto","Helvetica Neue","Arial","Noto Sans","sans-serif","Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji","Montserrat","ui-sans-serif","system-ui","-apple-system","system-ui","Segoe UI","Roboto","Helvetica Neue","Arial","Noto Sans","sans-serif","Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji"],"sans":["Montserrat","ui-sans-serif","system-ui","-apple-system","system-ui","Segoe UI","Roboto","Helvetica Neue","Arial","Noto Sans","sans-serif","Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji","Montserrat","ui-sans-serif","system-ui","-apple-system","system-ui","Segoe UI","Roboto","Helvetica Neue","Arial","Noto Sans","sans-serif","Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji","Montserrat","ui-sans-serif","system-ui","-apple-system","system-ui","Segoe UI","Roboto","Helvetica Neue","Arial","Noto Sans","sans-serif","Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji","Montserrat","ui-sans-serif","system-ui","-apple-system","system-ui","Segoe UI","Roboto","Helvetica Neue","Arial","Noto Sans","sans-serif","Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji"]},"colors":{"primary":{"50":"#fafaf9","100":"#f5f5f4","200":"#e7e5e4","300":"#d6d3d1","400":"#a8a29e","500":"#78716c","600":"#57534e","700":"#44403c","800":"#292524","900":"#1c1917","950":"#0c0a09"}}};
 
 const assets = prefixStorage(useStorage(), "/assets");
 async function loadFont({ e, publicStoragePath }, font) {
@@ -3647,14 +3645,14 @@ async function html(ctx) {
   const normalisedFonts = normaliseFontInput([...options.fonts || [], ...fonts]);
   const firstFont = normalisedFonts[0];
   if (firstFont)
-    defaultFontFamily = firstFont.name;
+    defaultFontFamily = firstFont.name.replaceAll("+", " ");
   await applyEmojis(ctx, island);
   let html2 = island.html;
   head.push({
     style: [
       {
         // default font is the first font family
-        innerHTML: `body { font-family: '${defaultFontFamily.replace("+", " ")}', sans-serif;  }`
+        innerHTML: `body { font-family: '${defaultFontFamily}', sans-serif;  }`
       },
       {
         innerHTML: `body {
@@ -3688,7 +3686,7 @@ svg[data-emoji] {
       ...fonts.map((font) => {
         return `
           @font-face {
-            font-family: '${font.name}';
+            font-family: '${font.name.replaceAll("+", " ")}';
             font-style: normal;
             font-weight: ${font.weight};
             src: url('/__og-image__/font/${font.key}') format('truetype');
@@ -3955,5 +3953,5 @@ async function imageEventHandler(e) {
   return image;
 }
 
-export { applyEmojis as a, fontEventHandler as f, imageEventHandler as i, loadFont as l, theme as t };
+export { applyEmojis as a, fontEventHandler as f, imageEventHandler as i, loadFont as l };
 //# sourceMappingURL=eventHandlers.mjs.map

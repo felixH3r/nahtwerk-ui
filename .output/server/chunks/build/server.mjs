@@ -1,16 +1,19 @@
-import { version, inject, ref, watchEffect, watch, getCurrentInstance, h as h$1, toRaw, isRef, isReactive, toRef, defineAsyncComponent, defineComponent, computed, unref, Suspense, nextTick, mergeProps, Transition, provide, useSSRContext, hasInjectionContext, createApp, effectScope, shallowReactive, reactive, getCurrentScope, onErrorCaptured, onServerPrefetch, createVNode, resolveDynamicComponent, shallowRef, isReadonly, onScopeDispose, isShallow, markRaw, toRefs, toValue } from 'vue';
-import { $ as $fetch, E as baseURL, F as hasProtocol, G as isScriptProtocol, I as joinURL, J as withQuery, c as createError$1, K as defu$1, L as sanitizeStatusCode, M as getContext, N as createHooks, O as withoutTrailingSlash, P as titleCase, Q as toRouteMatcher, R as createRouter$1, S as camelCase, z as parseURL, T as withoutBase, U as stringifyQuery, V as withLeadingSlash, W as withBase, w as withTrailingSlash, X as hasTrailingSlash, y as hash } from '../nitro/nitro.mjs';
-import { getActiveHead, CapoPlugin } from 'unhead';
-import { defineHeadPlugin as defineHeadPlugin$1, composableNames, unpackMeta } from '@unhead/shared';
+import { version, ref, watchEffect, watch, getCurrentInstance, h as h$1, defineComponent, provide, createElementBlock, toRaw, computed, isRef, isReactive, toRef, inject, unref, Suspense, nextTick, mergeProps, Transition, useSSRContext, hasInjectionContext, createApp, effectScope, shallowReactive, reactive, getCurrentScope, defineAsyncComponent, onErrorCaptured, onServerPrefetch, createVNode, resolveDynamicComponent, onScopeDispose, shallowRef, isReadonly, toRefs, markRaw, isShallow, toValue } from 'vue';
+import { $ as $fetch, F as baseURL, G as hasProtocol, I as isScriptProtocol, J as joinURL, K as withQuery, c as createError$1, L as defu, M as sanitizeStatusCode, N as getContext, O as createHooks, P as withoutTrailingSlash, Q as titleCase, R as toRouteMatcher, S as createRouter$1, T as camelCase, A as parseURL, U as withoutBase, V as stringifyQuery, W as withLeadingSlash, X as withBase, w as withTrailingSlash } from '../nitro/nitro.mjs';
+import { CapoPlugin, getActiveHead } from 'unhead';
+import { defineHeadPlugin, composableNames, unpackMeta } from '@unhead/shared';
 import { useRoute as useRoute$1, createMemoryHistory, createRouter, START_LOCATION } from 'vue-router';
 import { InferSeoMetaPlugin } from '@unhead/addons';
+import { defineWebSite, defineWebPage, SchemaOrgUnheadPlugin } from '@unhead/schema-org/vue';
 import { parse, stringify } from 'devalue';
-import Qs from 'axios';
+import Xs from 'axios';
 import * as h from 'retry-axios';
 import c from 'qs';
 import { ssrRenderComponent, ssrRenderSuspense, ssrRenderVNode } from 'vue/server-renderer';
 import crypto from 'crypto';
 import 'lru-cache';
+import '@unocss/core';
+import '@unocss/preset-wind';
 import 'node:http';
 import 'node:https';
 import 'node:fs';
@@ -74,32 +77,30 @@ if (!globalThis.$fetch) {
 const appLayoutTransition = false;
 const appPageTransition = false;
 const appKeepalive = false;
-const nuxtLinkDefaults = { "componentName": "NuxtLink", "prefetch": true, "prefetchOn": { "visibility": true } };
+const nuxtLinkDefaults = { "componentName": "NuxtLink" };
 const appId = "nuxt-app";
-function getNuxtAppCtx(id = appId) {
-  return getContext(id, {
+function getNuxtAppCtx(appName = appId) {
+  return getContext(appName, {
     asyncContext: false
   });
 }
 const NuxtPluginIndicator = "__nuxt_plugin";
 function createNuxtApp(options) {
-  var _a;
   let hydratingCount = 0;
   const nuxtApp = {
-    _id: options.id || appId || "nuxt-app",
+    _name: appId,
     _scope: effectScope(),
     provide: undefined,
     globalName: "nuxt",
     versions: {
       get nuxt() {
-        return "3.15.1";
+        return "3.12.3";
       },
       get vue() {
         return nuxtApp.vueApp.version;
       }
     },
     payload: shallowReactive({
-      ...((_a = options.ssrContext) == null ? undefined : _a.payload) || {},
       data: shallowReactive({}),
       state: reactive({}),
       once: /* @__PURE__ */ new Set(),
@@ -142,15 +143,6 @@ function createNuxtApp(options) {
   {
     nuxtApp.payload.serverRendered = true;
   }
-  if (nuxtApp.ssrContext) {
-    nuxtApp.payload.path = nuxtApp.ssrContext.url;
-    nuxtApp.ssrContext.nuxt = nuxtApp;
-    nuxtApp.ssrContext.payload = nuxtApp.payload;
-    nuxtApp.ssrContext.config = {
-      public: nuxtApp.ssrContext.runtimeConfig.public,
-      app: nuxtApp.ssrContext.runtimeConfig.app
-    };
-  }
   nuxtApp.hooks = createHooks();
   nuxtApp.hook = nuxtApp.hooks.hook;
   {
@@ -169,6 +161,22 @@ function createNuxtApp(options) {
   };
   defineGetter(nuxtApp.vueApp, "$nuxt", nuxtApp);
   defineGetter(nuxtApp.vueApp.config.globalProperties, "$nuxt", nuxtApp);
+  {
+    if (nuxtApp.ssrContext) {
+      nuxtApp.ssrContext.nuxt = nuxtApp;
+      nuxtApp.ssrContext._payloadReducers = {};
+      nuxtApp.payload.path = nuxtApp.ssrContext.url;
+    }
+    nuxtApp.ssrContext = nuxtApp.ssrContext || {};
+    if (nuxtApp.ssrContext.payload) {
+      Object.assign(nuxtApp.payload, nuxtApp.ssrContext.payload);
+    }
+    nuxtApp.ssrContext.payload = nuxtApp.payload;
+    nuxtApp.ssrContext.config = {
+      public: options.ssrContext.runtimeConfig.public,
+      app: options.ssrContext.runtimeConfig.app
+    };
+  }
   const runtimeConfig = options.ssrContext.runtimeConfig;
   nuxtApp.provide("config", runtimeConfig);
   return nuxtApp;
@@ -256,22 +264,22 @@ function defineNuxtPlugin(plugin2) {
 }
 function callWithNuxt(nuxt, setup, args) {
   const fn = () => setup();
-  const nuxtAppCtx = getNuxtAppCtx(nuxt._id);
+  const nuxtAppCtx = getNuxtAppCtx(nuxt._name);
   {
     return nuxt.vueApp.runWithContext(() => nuxtAppCtx.callAsync(nuxt, fn));
   }
 }
-function tryUseNuxtApp(id) {
+function tryUseNuxtApp(appName) {
   var _a;
   let nuxtAppInstance;
   if (hasInjectionContext()) {
     nuxtAppInstance = (_a = getCurrentInstance()) == null ? undefined : _a.appContext.app.$nuxt;
   }
-  nuxtAppInstance = nuxtAppInstance || getNuxtAppCtx(id).tryUse();
+  nuxtAppInstance = nuxtAppInstance || getNuxtAppCtx(appName).tryUse();
   return nuxtAppInstance || null;
 }
-function useNuxtApp(id) {
-  const nuxtAppInstance = tryUseNuxtApp(id);
+function useNuxtApp(appName) {
+  const nuxtAppInstance = tryUseNuxtApp(appName);
   if (!nuxtAppInstance) {
     {
       throw new Error("[nuxt] instance unavailable");
@@ -312,7 +320,6 @@ const isProcessingMiddleware = () => {
   }
   return false;
 };
-const URL_QUOTE_RE = /"/g;
 const navigateTo = (to, options) => {
   if (!to) {
     to = "/";
@@ -338,7 +345,7 @@ const navigateTo = (to, options) => {
       const location2 = isExternal ? toPath : joinURL((/* @__PURE__ */ useRuntimeConfig()).app.baseURL, fullPath);
       const redirect = async function(response) {
         await nuxtApp.callHook("app:redirected");
-        const encodedLoc = location2.replace(URL_QUOTE_RE, "%22");
+        const encodedLoc = location2.replace(/"/g, "%22");
         const encodedHeader = encodeURL(location2, isExternalHost);
         nuxtApp.ssrContext._renderResponse = {
           statusCode: sanitizeStatusCode((options == null ? undefined : options.redirectCode) || 302, 302),
@@ -440,7 +447,7 @@ function resolveUnrefHeadInput(ref2) {
   }
   return root;
 }
-defineHeadPlugin$1({
+defineHeadPlugin({
   hooks: {
     "entries:resolve": (ctx) => {
       for (const entry2 of ctx.entries)
@@ -643,11 +650,8 @@ function executeAsync(function_) {
   }
   return [awaitable, restore];
 }
-const ROUTE_KEY_PARENTHESES_RE$1 = /(:\w+)\([^)]+\)/g;
-const ROUTE_KEY_SYMBOLS_RE$1 = /(:\w+)[?+*]/g;
-const ROUTE_KEY_NORMAL_RE$1 = /:\w+/g;
 const interpolatePath = (route, match) => {
-  return match.path.replace(ROUTE_KEY_PARENTHESES_RE$1, "$1").replace(ROUTE_KEY_SYMBOLS_RE$1, "$1").replace(ROUTE_KEY_NORMAL_RE$1, (r) => {
+  return match.path.replace(/(:\w+)\([^)]+\)/g, "$1").replace(/(:\w+)[?+*]/g, "$1").replace(/:\w+/g, (r) => {
     var _a;
     return ((_a = route.params[r.slice(1)]) == null ? undefined : _a.toString()) || "";
   });
@@ -666,58 +670,54 @@ const wrapInKeepAlive = (props, children) => {
 function toArray$1(value) {
   return Array.isArray(value) ? value : [value];
 }
-async function getRouteRules(arg) {
-  const path = typeof arg === "string" ? arg : arg.path;
+async function getRouteRules(url) {
   {
-    useNuxtApp().ssrContext._preloadManifest = true;
     const _routeRulesMatcher = toRouteMatcher(
       createRouter$1({ routes: (/* @__PURE__ */ useRuntimeConfig()).nitro.routeRules })
     );
-    return defu$1({}, ..._routeRulesMatcher.matchAll(path).reverse());
+    return defu({}, ..._routeRulesMatcher.matchAll(url).reverse());
   }
-}
-function handleHotUpdate(_router, _generateRoutes) {
 }
 const _routes = [
   {
     name: "about-me",
     path: "/about-me",
-    component: () => import('./about-me-Dhy5SLeA.mjs')
+    component: () => import('./about-me-CeJoAII_.mjs').then((m2) => m2.default || m2)
   },
   {
     name: "danke",
     path: "/danke",
-    component: () => import('./danke-CqDhWTfT.mjs')
+    component: () => import('./danke-CpXfzm0w.mjs').then((m2) => m2.default || m2)
   },
   {
     name: "datenschutz",
     path: "/datenschutz",
-    component: () => import('./datenschutz-DnAAGybR.mjs')
+    component: () => import('./datenschutz-DnAAGybR.mjs').then((m2) => m2.default || m2)
   },
   {
     name: "impressum",
     path: "/impressum",
-    component: () => import('./impressum-DIo2Pk-G.mjs')
+    component: () => import('./impressum-DIo2Pk-G.mjs').then((m2) => m2.default || m2)
   },
   {
     name: "index",
     path: "/",
-    component: () => import('./index-BbPh86kK.mjs')
+    component: () => import('./index-B5kuIUa3.mjs').then((m2) => m2.default || m2)
   },
   {
     name: "products-productTitle",
     path: "/products/:productTitle()",
-    component: () => import('./_productTitle_-Gq95wN0Y.mjs')
+    component: () => import('./_productTitle_-CV-9K7RL.mjs').then((m2) => m2.default || m2)
   },
   {
     name: "shop",
     path: "/shop",
-    component: () => import('./shop-DOsHuUzE.mjs')
+    component: () => import('./shop-Bq4BfbbR.mjs').then((m2) => m2.default || m2)
   },
   {
     name: "warenkorb",
     path: "/warenkorb",
-    component: () => import('./warenkorb-on_XpI3_.mjs')
+    component: () => import('./warenkorb-CG7unFzY.mjs').then((m2) => m2.default || m2)
   }
 ];
 const _wrapIf = (component, props, slots) => {
@@ -727,11 +727,8 @@ const _wrapIf = (component, props, slots) => {
     return props ? h$1(component, props, slots) : (_a = slots.default) == null ? undefined : _a.call(slots);
   } };
 };
-const ROUTE_KEY_PARENTHESES_RE = /(:\w+)\([^)]+\)/g;
-const ROUTE_KEY_SYMBOLS_RE = /(:\w+)[?+*]/g;
-const ROUTE_KEY_NORMAL_RE = /:\w+/g;
 function generateRouteKey(route) {
-  const source = (route == null ? undefined : route.meta.key) ?? route.path.replace(ROUTE_KEY_PARENTHESES_RE, "$1").replace(ROUTE_KEY_SYMBOLS_RE, "$1").replace(ROUTE_KEY_NORMAL_RE, (r) => {
+  const source = (route == null ? undefined : route.meta.key) ?? route.path.replace(/(:\w+)\([^)]+\)/g, "$1").replace(/(:\w+)[?+*]/g, "$1").replace(/:\w+/g, (r) => {
     var _a;
     return ((_a = route.params[r.slice(1)]) == null ? undefined : _a.toString()) || "";
   });
@@ -791,7 +788,7 @@ function _getHashElementScrollMarginTop(selector) {
   try {
     const elem = (void 0).querySelector(selector);
     if (elem) {
-      return (Number.parseFloat(getComputedStyle(elem).scrollMarginTop) || 0) + (Number.parseFloat(getComputedStyle((void 0).documentElement).scrollPaddingTop) || 0);
+      return Number.parseFloat(getComputedStyle(elem).scrollMarginTop);
     }
   } catch {
   }
@@ -811,29 +808,15 @@ const validate = /* @__PURE__ */ defineNuxtRouteMiddleware(async (to) => {
   if (!((_a = to.meta) == null ? undefined : _a.validate)) {
     return;
   }
-  const nuxtApp = useNuxtApp();
-  const router = useRouter();
+  useNuxtApp();
+  useRouter();
   const result = ([__temp, __restore] = executeAsync(() => Promise.resolve(to.meta.validate(to))), __temp = await __temp, __restore(), __temp);
   if (result === true) {
     return;
   }
-  const error = createError({
-    statusCode: result && result.statusCode || 404,
-    statusMessage: result && result.statusMessage || `Page Not Found: ${to.fullPath}`,
-    data: {
-      path: to.fullPath
-    }
-  });
-  const unsub = router.beforeResolve((final) => {
-    unsub();
-    if (final === to) {
-      const unsub2 = router.afterEach(async () => {
-        unsub2();
-        await nuxtApp.runWithContext(() => showError(error));
-      });
-      return false;
-    }
-  });
+  {
+    return result;
+  }
 });
 const manifest_45route_45rule = /* @__PURE__ */ defineNuxtRouteMiddleware(async (to) => {
   {
@@ -849,11 +832,14 @@ const plugin$1 = /* @__PURE__ */ defineNuxtPlugin({
   name: "nuxt:router",
   enforce: "pre",
   async setup(nuxtApp) {
-    var _a, _b, _c;
+    var _a, _b, _c, _d;
     let __temp, __restore;
     let routerBase = (/* @__PURE__ */ useRuntimeConfig()).app.baseURL;
+    if (routerOptions.hashMode && !routerBase.includes("#")) {
+      routerBase += "#";
+    }
     const history = ((_a = routerOptions.history) == null ? undefined : _a.call(routerOptions, routerBase)) ?? createMemoryHistory(routerBase);
-    const routes2 = routerOptions.routes ? ([__temp, __restore] = executeAsync(() => routerOptions.routes(_routes)), __temp = await __temp, __restore(), __temp) ?? _routes : _routes;
+    const routes2 = ((_b = routerOptions.routes) == null ? undefined : _b.call(routerOptions, _routes)) ?? _routes;
     let startPosition;
     const router = createRouter({
       ...routerOptions,
@@ -876,7 +862,6 @@ const plugin$1 = /* @__PURE__ */ defineNuxtPlugin({
       history,
       routes: routes2
     });
-    handleHotUpdate(router, routerOptions.routes ? routerOptions.routes : (routes22) => routes22);
     nuxtApp.vueApp.use(router);
     const previousRoute = shallowRef(router.currentRoute.value);
     router.afterEach((_to, from) => {
@@ -892,16 +877,15 @@ const plugin$1 = /* @__PURE__ */ defineNuxtPlugin({
     };
     nuxtApp.hook("page:finish", syncCurrentRoute);
     router.afterEach((to, from) => {
-      var _a2, _b2, _c2, _d;
-      if (((_b2 = (_a2 = to.matched[0]) == null ? undefined : _a2.components) == null ? undefined : _b2.default) === ((_d = (_c2 = from.matched[0]) == null ? undefined : _c2.components) == null ? undefined : _d.default)) {
+      var _a2, _b2, _c2, _d2;
+      if (((_b2 = (_a2 = to.matched[0]) == null ? undefined : _a2.components) == null ? undefined : _b2.default) === ((_d2 = (_c2 = from.matched[0]) == null ? undefined : _c2.components) == null ? undefined : _d2.default)) {
         syncCurrentRoute();
       }
     });
     const route = {};
     for (const key in _route.value) {
       Object.defineProperty(route, key, {
-        get: () => _route.value[key],
-        enumerable: true
+        get: () => _route.value[key]
       });
     }
     nuxtApp._route = shallowReactive(route);
@@ -910,7 +894,7 @@ const plugin$1 = /* @__PURE__ */ defineNuxtPlugin({
       named: {}
     };
     useError();
-    if (!((_b = nuxtApp.ssrContext) == null ? undefined : _b.islandContext)) {
+    if (!((_c = nuxtApp.ssrContext) == null ? undefined : _c.islandContext)) {
       router.afterEach(async (to, _from, failure) => {
         delete nuxtApp._processingMiddleware;
         if (failure) {
@@ -919,7 +903,16 @@ const plugin$1 = /* @__PURE__ */ defineNuxtPlugin({
         if ((failure == null ? undefined : failure.type) === 4) {
           return;
         }
-        if (to.redirectedFrom && to.fullPath !== initialURL) {
+        if (to.matched.length === 0) {
+          await nuxtApp.runWithContext(() => showError(createError$1({
+            statusCode: 404,
+            fatal: false,
+            statusMessage: `Page not found: ${to.fullPath}`,
+            data: {
+              path: to.fullPath
+            }
+          })));
+        } else if (to.redirectedFrom && to.fullPath !== initialURL) {
           await nuxtApp.runWithContext(() => navigateTo(to.fullPath || "/"));
         }
       });
@@ -938,7 +931,7 @@ const plugin$1 = /* @__PURE__ */ defineNuxtPlugin({
     }
     const resolvedInitialRoute = router.currentRoute.value;
     syncCurrentRoute();
-    if ((_c = nuxtApp.ssrContext) == null ? undefined : _c.islandContext) {
+    if ((_d = nuxtApp.ssrContext) == null ? undefined : _d.islandContext) {
       return { provide: { router } };
     }
     const initialLayout = nuxtApp.payload.state._layout;
@@ -962,7 +955,7 @@ const plugin$1 = /* @__PURE__ */ defineNuxtPlugin({
           }
         }
         {
-          const routeRules = await nuxtApp.runWithContext(() => getRouteRules({ path: to.path }));
+          const routeRules = await nuxtApp.runWithContext(() => getRouteRules(to.path));
           if (routeRules.appMiddleware) {
             for (const key in routeRules.appMiddleware) {
               if (routeRules.appMiddleware[key]) {
@@ -1001,18 +994,6 @@ const plugin$1 = /* @__PURE__ */ defineNuxtPlugin({
     router.onError(async () => {
       delete nuxtApp._processingMiddleware;
       await nuxtApp.callHook("page:loading:end");
-    });
-    router.afterEach(async (to, _from) => {
-      if (to.matched.length === 0) {
-        await nuxtApp.runWithContext(() => showError(createError$1({
-          statusCode: 404,
-          fatal: false,
-          statusMessage: `Page not found: ${to.fullPath}`,
-          data: {
-            path: to.fullPath
-          }
-        })));
-      }
     });
     nuxtApp.hooks.hookOnce("app:created", async () => {
       try {
@@ -1066,6 +1047,29 @@ function definePayloadReducer(name, reduce) {
     useNuxtApp().ssrContext._payloadReducers[name] = reduce;
   }
 }
+const clientOnlySymbol = Symbol.for("nuxt:client-only");
+defineComponent({
+  name: "ClientOnly",
+  inheritAttrs: false,
+  props: ["fallback", "placeholder", "placeholderTag", "fallbackTag"],
+  setup(_2, { slots, attrs }) {
+    const mounted = ref(false);
+    provide(clientOnlySymbol, true);
+    return (props) => {
+      var _a;
+      if (mounted.value) {
+        return (_a = slots.default) == null ? undefined : _a.call(slots);
+      }
+      const slot = slots.fallback || slots.placeholder;
+      if (slot) {
+        return slot();
+      }
+      const fallbackStr = props.fallback || props.placeholder || "";
+      const fallbackTag = props.fallbackTag || props.placeholderTag || "span";
+      return createElementBlock(fallbackTag, attrs, fallbackStr);
+    };
+  }
+});
 const _0_siteConfig_jtc2qNDx4l = /* @__PURE__ */ defineNuxtPlugin({
   name: "nuxt-site-config:init",
   enforce: "pre",
@@ -1089,29 +1093,29 @@ const _0_siteConfig_jtc2qNDx4l = /* @__PURE__ */ defineNuxtPlugin({
     };
   }
 });
-const reducers = [
-  ["NuxtError", (data) => isNuxtError(data) && data.toJSON()],
-  ["EmptyShallowRef", (data) => isRef(data) && isShallow(data) && !data.value && (typeof data.value === "bigint" ? "0n" : JSON.stringify(data.value) || "_")],
-  ["EmptyRef", (data) => isRef(data) && !data.value && (typeof data.value === "bigint" ? "0n" : JSON.stringify(data.value) || "_")],
-  ["ShallowRef", (data) => isRef(data) && isShallow(data) && data.value],
-  ["ShallowReactive", (data) => isReactive(data) && isShallow(data) && toRaw(data)],
-  ["Ref", (data) => isRef(data) && data.value],
-  ["Reactive", (data) => isReactive(data) && toRaw(data)]
-];
+const reducers = {
+  NuxtError: (data) => isNuxtError(data) && data.toJSON(),
+  EmptyShallowRef: (data) => isRef(data) && isShallow(data) && !data.value && (typeof data.value === "bigint" ? "0n" : JSON.stringify(data.value) || "_"),
+  EmptyRef: (data) => isRef(data) && !data.value && (typeof data.value === "bigint" ? "0n" : JSON.stringify(data.value) || "_"),
+  ShallowRef: (data) => isRef(data) && isShallow(data) && data.value,
+  ShallowReactive: (data) => isReactive(data) && isShallow(data) && toRaw(data),
+  Ref: (data) => isRef(data) && data.value,
+  Reactive: (data) => isReactive(data) && toRaw(data)
+};
 {
-  reducers.push(["Island", (data) => data && (data == null ? undefined : data.__nuxt_island)]);
+  reducers.Island = (data) => data && (data == null ? undefined : data.__nuxt_island);
 }
 const revive_payload_server_eJ33V7gbc6 = /* @__PURE__ */ defineNuxtPlugin({
   name: "nuxt:revive-payload:server",
   setup() {
-    for (const [reducer, fn] of reducers) {
-      definePayloadReducer(reducer, fn);
+    for (const reducer in reducers) {
+      definePayloadReducer(reducer, reducers[reducer]);
     }
   }
 });
 /*!
- * pinia v2.2.0
- * (c) 2024 Eduardo San Martin Morote
+ * pinia v2.3.1
+ * (c) 2025 Eduardo San Martin Morote
  * @license MIT
  */
 let activePinia;
@@ -1120,7 +1124,7 @@ const piniaSymbol = (
   /* istanbul ignore next */
   Symbol()
 );
-function isPlainObject$1(o) {
+function isPlainObject(o) {
   return o && typeof o === "object" && Object.prototype.toString.call(o) === "[object Object]" && typeof o.toJSON !== "function";
 }
 var MutationType;
@@ -1198,7 +1202,7 @@ function mergeReactiveObjects(target, patchToApply) {
       continue;
     const subPatch = patchToApply[key];
     const targetValue = target[key];
-    if (isPlainObject$1(targetValue) && isPlainObject$1(subPatch) && target.hasOwnProperty(key) && !isRef(subPatch) && !isReactive(subPatch)) {
+    if (isPlainObject(targetValue) && isPlainObject(subPatch) && target.hasOwnProperty(key) && !isRef(subPatch) && !isReactive(subPatch)) {
       target[key] = mergeReactiveObjects(targetValue, subPatch);
     } else {
       target[key] = subPatch;
@@ -1211,7 +1215,7 @@ const skipHydrateSymbol = (
   Symbol()
 );
 function shouldHydrate(obj) {
-  return !isPlainObject$1(obj) || !obj.hasOwnProperty(skipHydrateSymbol);
+  return !isPlainObject(obj) || !obj.hasOwnProperty(skipHydrateSymbol);
 }
 const { assign } = Object;
 function isComputed(o) {
@@ -1425,6 +1429,8 @@ function createSetupStore($id, setup, options = {}, pinia, hot, isOptionsStore) 
   isSyncListening = true;
   return store;
 }
+/*! #__NO_SIDE_EFFECTS__ */
+// @__NO_SIDE_EFFECTS__
 function defineStore(idOrOptions, setup, setupOptions) {
   let id;
   let options;
@@ -1459,11 +1465,19 @@ function defineStore(idOrOptions, setup, setupOptions) {
 }
 function storeToRefs(store) {
   {
-    store = toRaw(store);
+    const rawStore = toRaw(store);
     const refs = {};
-    for (const key in store) {
-      const value = store[key];
-      if (isRef(value) || isReactive(value)) {
+    for (const key in rawStore) {
+      const value = rawStore[key];
+      if (value.effect) {
+        refs[key] = // ...
+        computed({
+          get: () => store[key],
+          set(value2) {
+            store[key] = value2;
+          }
+        });
+      } else if (isRef(value) || isReactive(value)) {
         refs[key] = // ---
         toRef(store, key);
       }
@@ -1491,8 +1505,9 @@ const components_plugin_KR1HBZs4kY = /* @__PURE__ */ defineNuxtPlugin({
   name: "nuxt:global-components"
 });
 function useSiteConfig(options) {
+  var _a;
   let stack;
-  stack = useRequestEvent().context.siteConfig.get(defu$1({ resolveRefs: true }, options));
+  stack = (_a = useRequestEvent()) == null ? undefined : _a.context.siteConfig.get(defu({ resolveRefs: true }, options));
   return stack || {};
 }
 const siteConfig_JRId4KOeUL = /* @__PURE__ */ defineNuxtPlugin(() => {
@@ -1537,10 +1552,14 @@ const titles_eoILE7jqvj = /* @__PURE__ */ defineNuxtPlugin({
   },
   setup() {
     const route = useRoute();
+    const err = useError();
     const title = computed(() => {
-      var _a, _b;
-      if (typeof ((_a = route.meta) == null ? undefined : _a.title) === "string")
-        return (_b = route.meta) == null ? undefined : _b.title;
+      var _a, _b, _c;
+      if ([404, 500].includes((_a = err.value) == null ? undefined : _a.statusCode)) {
+        return `${err.value.statusCode} - ${err.value.message}`;
+      }
+      if (typeof ((_b = route.meta) == null ? undefined : _b.title) === "string")
+        return (_c = route.meta) == null ? undefined : _c.title;
       const path = withoutTrailingSlash(route.path || "/");
       const lastSegment = path.split("/").pop();
       return lastSegment ? titleCase(lastSegment) : null;
@@ -1554,12 +1573,11 @@ const titles_eoILE7jqvj = /* @__PURE__ */ defineNuxtPlugin({
 });
 function useSchemaOrgConfig() {
   const runtimeConfig = /* @__PURE__ */ useRuntimeConfig();
-  return defu$1(runtimeConfig["nuxt-schema-org"], {
+  return defu(runtimeConfig["nuxt-schema-org"], {
     scriptAttributes: {}
   });
 }
 function useSchemaOrg(input) {
-  var _a;
   const config = useSchemaOrgConfig();
   const script = {
     type: "application/ld+json",
@@ -1569,1630 +1587,10 @@ function useSchemaOrg(input) {
     ...config.scriptAttributes
   };
   {
-    const event = useRequestEvent();
-    if (typeof (event == null ? undefined : event.context.robots) !== "undefined" && !((_a = event.context.robots) == null ? undefined : _a.indexable)) {
-      return;
-    }
     return useServerHead({
       script: [script]
     });
   }
-}
-function defineSchemaOrgResolver(schema) {
-  return schema;
-}
-function idReference(node) {
-  return {
-    "@id": typeof node !== "string" ? node["@id"] : node
-  };
-}
-function resolvableDateToDate(val) {
-  try {
-    const date = val instanceof Date ? val : new Date(Date.parse(val));
-    return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
-  } catch (e) {
-  }
-  return typeof val === "string" ? val : val.toString();
-}
-const IS_VALID_W3C_DATE = [
-  /(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))/,
-  /^\d{4}-[01]\d-[0-3]\d$/,
-  /^\d{4}-[01]\d$/,
-  /^\d{4}$/
-];
-function isValidW3CDate(d) {
-  return IS_VALID_W3C_DATE.some((r) => r.test(d));
-}
-function resolvableDateToIso(val) {
-  if (!val)
-    return val;
-  try {
-    if (val instanceof Date)
-      return val.toISOString();
-    else if (isValidW3CDate(val))
-      return val;
-    else
-      return new Date(Date.parse(val)).toISOString();
-  } catch (e) {
-  }
-  return typeof val === "string" ? val : val.toString();
-}
-const IdentityId = "#identity";
-function setIfEmpty(node, field, value) {
-  if (!(node == null ? undefined : node[field]) && value)
-    node[field] = value;
-}
-function asArray(input) {
-  return Array.isArray(input) ? input : [input];
-}
-function dedupeMerge(node, field, value) {
-  const data = new Set(asArray(node[field]));
-  data.add(value);
-  node[field] = [...data].filter(Boolean);
-}
-function prefixId(url, id) {
-  if (hasProtocol(id))
-    return id;
-  if (!id.includes("#"))
-    id = `#${id}`;
-  return withBase(id, url);
-}
-function trimLength(val, length) {
-  if (!val)
-    return val;
-  if (val.length > length) {
-    const trimmedString = val.substring(0, length);
-    return trimmedString.substring(0, Math.min(trimmedString.length, trimmedString.lastIndexOf(" ")));
-  }
-  return val;
-}
-function resolveDefaultType(node, defaultType) {
-  const val = node["@type"];
-  if (val === defaultType)
-    return;
-  const types = /* @__PURE__ */ new Set([
-    ...asArray(defaultType),
-    ...asArray(val)
-  ]);
-  node["@type"] = types.size === 1 ? val : [...types.values()];
-}
-function resolveWithBase(base, urlOrPath) {
-  if (!urlOrPath || hasProtocol(urlOrPath) || urlOrPath[0] !== "/" && urlOrPath[0] !== "#")
-    return urlOrPath;
-  return withBase(urlOrPath, base);
-}
-function resolveAsGraphKey(key) {
-  if (!key)
-    return key;
-  return key.substring(key.lastIndexOf("#"));
-}
-function stripEmptyProperties(obj) {
-  for (const k2 in obj) {
-    if (!Object.prototype.hasOwnProperty.call(obj, k2)) {
-      continue;
-    }
-    if (obj[k2] && typeof obj[k2] === "object") {
-      if (obj[k2].__v_isReadonly || obj[k2].__v_isRef)
-        return;
-      stripEmptyProperties(obj[k2]);
-      return;
-    }
-    if (obj[k2] === "" || obj[k2] === null || obj[k2] === undefined)
-      delete obj[k2];
-  }
-  return obj;
-}
-const quantitativeValueResolver = defineSchemaOrgResolver({
-  cast(node) {
-    if (typeof node === "number") {
-      return {
-        value: node
-      };
-    }
-    return node;
-  },
-  defaults: {
-    "@type": "QuantitativeValue"
-  }
-});
-const monetaryAmountResolver = defineSchemaOrgResolver({
-  defaults: {
-    "@type": "MonetaryAmount"
-  },
-  resolve(node, ctx) {
-    if (typeof node.value !== "number")
-      node.value = resolveRelation(node.value, ctx, quantitativeValueResolver);
-    return node;
-  }
-});
-const merchantReturnPolicyResolver = defineSchemaOrgResolver({
-  defaults: {
-    "@type": "MerchantReturnPolicy"
-  },
-  resolve(node, ctx) {
-    if (node.returnPolicyCategory)
-      node.returnPolicyCategory = withBase(node.returnPolicyCategory, "https://schema.org/");
-    if (node.returnFees)
-      node.returnFees = withBase(node.returnFees, "https://schema.org/");
-    if (node.returnMethod)
-      node.returnMethod = withBase(node.returnMethod, "https://schema.org/");
-    node.returnShippingFeesAmount = resolveRelation(node.returnShippingFeesAmount, ctx, monetaryAmountResolver);
-    return node;
-  }
-});
-const definedRegionResolver = defineSchemaOrgResolver({
-  defaults: {
-    "@type": "DefinedRegion"
-  }
-});
-const shippingDeliveryTimeResolver = defineSchemaOrgResolver({
-  defaults: {
-    "@type": "ShippingDeliveryTime"
-  },
-  resolve(node, ctx) {
-    node.handlingTime = resolveRelation(node.handlingTime, ctx, quantitativeValueResolver);
-    node.transitTime = resolveRelation(node.transitTime, ctx, quantitativeValueResolver);
-    return node;
-  }
-});
-const offerShippingDetailsResolver = defineSchemaOrgResolver({
-  defaults: {
-    "@type": "OfferShippingDetails"
-  },
-  resolve(node, ctx) {
-    node.deliveryTime = resolveRelation(node.deliveryTime, ctx, shippingDeliveryTimeResolver);
-    node.shippingDestination = resolveRelation(node.shippingDestination, ctx, definedRegionResolver);
-    node.shippingRate = resolveRelation(node.shippingRate, ctx, monetaryAmountResolver);
-    return node;
-  }
-});
-const offerResolver = defineSchemaOrgResolver({
-  cast(node) {
-    if (typeof node === "number" || typeof node === "string") {
-      return {
-        price: node
-      };
-    }
-    return node;
-  },
-  defaults: {
-    "@type": "Offer",
-    "availability": "InStock"
-  },
-  resolve(node, ctx) {
-    setIfEmpty(node, "priceCurrency", ctx.meta.currency);
-    setIfEmpty(node, "priceValidUntil", new Date(Date.UTC((/* @__PURE__ */ new Date()).getFullYear() + 1, 12, -1, 0, 0, 0)));
-    if (node.url)
-      resolveWithBase(ctx.meta.host, node.url);
-    if (node.availability)
-      node.availability = withBase(node.availability, "https://schema.org/");
-    if (node.itemCondition)
-      node.itemCondition = withBase(node.itemCondition, "https://schema.org/");
-    if (node.priceValidUntil)
-      node.priceValidUntil = resolvableDateToIso(node.priceValidUntil);
-    node.hasMerchantReturnPolicy = resolveRelation(node.hasMerchantReturnPolicy, ctx, merchantReturnPolicyResolver);
-    node.shippingDetails = resolveRelation(node.shippingDetails, ctx, offerShippingDetailsResolver);
-    return node;
-  }
-});
-const aggregateOfferResolver = defineSchemaOrgResolver({
-  defaults: {
-    "@type": "AggregateOffer"
-  },
-  inheritMeta: [
-    { meta: "currency", key: "priceCurrency" }
-  ],
-  resolve(node, ctx) {
-    node.offers = resolveRelation(node.offers, ctx, offerResolver);
-    if (node.offers)
-      setIfEmpty(node, "offerCount", asArray(node.offers).length);
-    return node;
-  }
-});
-const aggregateRatingResolver = defineSchemaOrgResolver({
-  defaults: {
-    "@type": "AggregateRating"
-  }
-});
-const listItemResolver = defineSchemaOrgResolver({
-  cast(node) {
-    if (typeof node === "string") {
-      node = {
-        name: node
-      };
-    }
-    return node;
-  },
-  defaults: {
-    "@type": "ListItem"
-  },
-  resolve(node, ctx) {
-    if (typeof node.item === "string")
-      node.item = resolveWithBase(ctx.meta.host, node.item);
-    else if (typeof node.item === "object")
-      node.item = resolveRelation(node.item, ctx);
-    return node;
-  }
-});
-const PrimaryBreadcrumbId = "#breadcrumb";
-const breadcrumbResolver = defineSchemaOrgResolver({
-  defaults: {
-    "@type": "BreadcrumbList"
-  },
-  idPrefix: ["url", PrimaryBreadcrumbId],
-  resolve(breadcrumb, ctx) {
-    if (breadcrumb.itemListElement) {
-      let index = 1;
-      breadcrumb.itemListElement = resolveRelation(breadcrumb.itemListElement, ctx, listItemResolver, {
-        array: true,
-        afterResolve(node) {
-          setIfEmpty(node, "position", index++);
-        }
-      });
-    }
-    return breadcrumb;
-  },
-  resolveRootNode(node, { find }) {
-    const webPage = find(PrimaryWebPageId);
-    if (webPage)
-      setIfEmpty(webPage, "breadcrumb", idReference(node));
-  }
-});
-const imageResolver = defineSchemaOrgResolver({
-  alias: "image",
-  cast(input) {
-    if (typeof input === "string") {
-      input = {
-        url: input
-      };
-    }
-    return input;
-  },
-  defaults: {
-    "@type": "ImageObject"
-  },
-  inheritMeta: [
-    // @todo possibly only do if there's a caption
-    "inLanguage"
-  ],
-  idPrefix: "host",
-  resolve(image, { meta }) {
-    image.url = resolveWithBase(meta.host, image.url);
-    setIfEmpty(image, "contentUrl", image.url);
-    if (image.height && !image.width)
-      delete image.height;
-    if (image.width && !image.height)
-      delete image.width;
-    return image;
-  }
-});
-const addressResolver = defineSchemaOrgResolver({
-  defaults: {
-    "@type": "PostalAddress"
-  }
-});
-const searchActionResolver = defineSchemaOrgResolver({
-  defaults: {
-    "@type": "SearchAction",
-    "target": {
-      "@type": "EntryPoint"
-    },
-    "query-input": {
-      "@type": "PropertyValueSpecification",
-      "valueRequired": true,
-      "valueName": "search_term_string"
-    }
-  },
-  resolve(node, ctx) {
-    if (typeof node.target === "string") {
-      node.target = {
-        "@type": "EntryPoint",
-        "urlTemplate": resolveWithBase(ctx.meta.host, node.target)
-      };
-    }
-    return node;
-  }
-});
-const PrimaryWebSiteId = "#website";
-const webSiteResolver = defineSchemaOrgResolver({
-  defaults: {
-    "@type": "WebSite"
-  },
-  inheritMeta: [
-    "inLanguage",
-    { meta: "host", key: "url" }
-  ],
-  idPrefix: ["host", PrimaryWebSiteId],
-  resolve(node, ctx) {
-    node.potentialAction = resolveRelation(node.potentialAction, ctx, searchActionResolver, {
-      array: true
-    });
-    node.publisher = resolveRelation(node.publisher, ctx);
-    return node;
-  },
-  resolveRootNode(node, { find }) {
-    if (resolveAsGraphKey(node["@id"]) === PrimaryWebSiteId) {
-      const identity = find(IdentityId);
-      if (identity)
-        setIfEmpty(node, "publisher", idReference(identity));
-      const webPage = find(PrimaryWebPageId);
-      if (webPage)
-        setIfEmpty(webPage, "isPartOf", idReference(node));
-    }
-    return node;
-  }
-});
-const organizationResolver = defineSchemaOrgResolver({
-  defaults: {
-    "@type": "Organization"
-  },
-  idPrefix: ["host", IdentityId],
-  inheritMeta: [
-    { meta: "host", key: "url" }
-  ],
-  resolve(node, ctx) {
-    resolveDefaultType(node, "Organization");
-    node.address = resolveRelation(node.address, ctx, addressResolver);
-    return node;
-  },
-  resolveRootNode(node, ctx) {
-    const isIdentity = resolveAsGraphKey(node["@id"]) === IdentityId;
-    const webPage = ctx.find(PrimaryWebPageId);
-    if (node.logo && isIdentity) {
-      if (!ctx.find("#organization")) {
-        const logoNode = resolveRelation(node.logo, ctx, imageResolver, {
-          root: true,
-          afterResolve(logo) {
-            logo["@id"] = prefixId(ctx.meta.host, "#logo");
-            setIfEmpty(logo, "caption", node.name);
-          }
-        });
-        if (webPage && logoNode)
-          setIfEmpty(webPage, "primaryImageOfPage", idReference(logoNode));
-        ctx.nodes.push({
-          // we want to make a simple node that has the essentials, this will allow parent nodes to inject
-          // as well without inserting invalid data (i.e LocalBusiness operatingHours)
-          "@type": "Organization",
-          "name": node.name,
-          "url": node.url,
-          "sameAs": node.sameAs,
-          // 'image': idReference(logoNode),
-          "address": node.address,
-          // needs to be a URL
-          "logo": resolveRelation(node.logo, ctx, imageResolver, { root: false }).url,
-          "_priority": -1,
-          "@id": prefixId(ctx.meta.host, "#organization")
-          // avoid the id so nothing can link to it
-        });
-      }
-      delete node.logo;
-    }
-    if (isIdentity && webPage)
-      setIfEmpty(webPage, "about", idReference(node));
-    const webSite = ctx.find(PrimaryWebSiteId);
-    if (webSite)
-      setIfEmpty(webSite, "publisher", idReference(node));
-  }
-});
-const readActionResolver = defineSchemaOrgResolver({
-  defaults: {
-    "@type": "ReadAction"
-  },
-  resolve(node, ctx) {
-    if (!node.target.includes(ctx.meta.url))
-      node.target.unshift(ctx.meta.url);
-    return node;
-  }
-});
-const PrimaryWebPageId = "#webpage";
-const webPageResolver = defineSchemaOrgResolver({
-  defaults({ meta }) {
-    const endPath = withoutTrailingSlash(meta.url.substring(meta.url.lastIndexOf("/") + 1));
-    let type = "WebPage";
-    switch (endPath) {
-      case "about":
-      case "about-us":
-        type = "AboutPage";
-        break;
-      case "search":
-        type = "SearchResultsPage";
-        break;
-      case "checkout":
-        type = "CheckoutPage";
-        break;
-      case "contact":
-      case "get-in-touch":
-      case "contact-us":
-        type = "ContactPage";
-        break;
-      case "faq":
-        type = "FAQPage";
-        break;
-    }
-    const defaults = {
-      "@type": type
-    };
-    return defaults;
-  },
-  idPrefix: ["url", PrimaryWebPageId],
-  inheritMeta: [
-    { meta: "title", key: "name" },
-    "description",
-    "datePublished",
-    "dateModified",
-    "url"
-  ],
-  resolve(node, ctx) {
-    node.dateModified = resolvableDateToIso(node.dateModified);
-    node.datePublished = resolvableDateToIso(node.datePublished);
-    resolveDefaultType(node, "WebPage");
-    node.about = resolveRelation(node.about, ctx, organizationResolver);
-    node.breadcrumb = resolveRelation(node.breadcrumb, ctx, breadcrumbResolver);
-    node.author = resolveRelation(node.author, ctx, personResolver);
-    node.primaryImageOfPage = resolveRelation(node.primaryImageOfPage, ctx, imageResolver);
-    node.potentialAction = resolveRelation(node.potentialAction, ctx, readActionResolver);
-    if (node["@type"] === "WebPage" && ctx.meta.url) {
-      setIfEmpty(node, "potentialAction", [
-        {
-          "@type": "ReadAction",
-          "target": [ctx.meta.url]
-        }
-      ]);
-    }
-    return node;
-  },
-  resolveRootNode(webPage, { find, meta }) {
-    const identity = find(IdentityId);
-    const webSite = find(PrimaryWebSiteId);
-    const logo = find("#logo");
-    if (identity && meta.url === meta.host)
-      setIfEmpty(webPage, "about", idReference(identity));
-    if (logo)
-      setIfEmpty(webPage, "primaryImageOfPage", idReference(logo));
-    if (webSite)
-      setIfEmpty(webPage, "isPartOf", idReference(webSite));
-    const breadcrumb = find(PrimaryBreadcrumbId);
-    if (breadcrumb)
-      setIfEmpty(webPage, "breadcrumb", idReference(breadcrumb));
-    return webPage;
-  }
-});
-const personResolver = defineSchemaOrgResolver({
-  cast(node) {
-    if (typeof node === "string") {
-      return {
-        name: node
-      };
-    }
-    return node;
-  },
-  defaults: {
-    "@type": "Person"
-  },
-  idPrefix: ["host", IdentityId],
-  resolve(node, ctx) {
-    if (node.url)
-      node.url = resolveWithBase(ctx.meta.host, node.url);
-    return node;
-  },
-  resolveRootNode(node, { find, meta }) {
-    if (resolveAsGraphKey(node["@id"]) === IdentityId) {
-      setIfEmpty(node, "url", meta.host);
-      const webPage = find(PrimaryWebPageId);
-      if (webPage)
-        setIfEmpty(webPage, "about", idReference(node));
-      const webSite = find(PrimaryWebSiteId);
-      if (webSite)
-        setIfEmpty(webSite, "publisher", idReference(node));
-    }
-    const article = find(PrimaryArticleId);
-    if (article)
-      setIfEmpty(article, "author", idReference(node));
-  }
-});
-const PrimaryArticleId = "#article";
-const articleResolver = defineSchemaOrgResolver({
-  defaults: {
-    "@type": "Article"
-  },
-  inheritMeta: [
-    "inLanguage",
-    "description",
-    "image",
-    "dateModified",
-    "datePublished",
-    { meta: "title", key: "headline" }
-  ],
-  idPrefix: ["url", PrimaryArticleId],
-  resolve(node, ctx) {
-    node.author = resolveRelation(node.author, ctx, personResolver, {
-      root: true
-    });
-    node.publisher = resolveRelation(node.publisher, ctx);
-    node.dateModified = resolvableDateToIso(node.dateModified);
-    node.datePublished = resolvableDateToIso(node.datePublished);
-    resolveDefaultType(node, "Article");
-    node.headline = trimLength(node.headline, 110);
-    return node;
-  },
-  resolveRootNode(node, { find, meta }) {
-    var _a;
-    const webPage = find(PrimaryWebPageId);
-    const identity = find(IdentityId);
-    if (node.image && !node.thumbnailUrl) {
-      const firstImage = asArray(node.image)[0];
-      if (typeof firstImage === "string")
-        setIfEmpty(node, "thumbnailUrl", resolveWithBase(meta.host, firstImage));
-      else if (firstImage == null ? undefined : firstImage["@id"])
-        setIfEmpty(node, "thumbnailUrl", (_a = find(firstImage["@id"])) == null ? undefined : _a.url);
-    }
-    if (identity) {
-      setIfEmpty(node, "publisher", idReference(identity));
-      setIfEmpty(node, "author", idReference(identity));
-    }
-    if (webPage) {
-      setIfEmpty(node, "isPartOf", idReference(webPage));
-      setIfEmpty(node, "mainEntityOfPage", idReference(webPage));
-      setIfEmpty(webPage, "potentialAction", [
-        {
-          "@type": "ReadAction",
-          "target": [meta.url]
-        }
-      ]);
-      setIfEmpty(webPage, "dateModified", node.dateModified);
-      setIfEmpty(webPage, "datePublished", node.datePublished);
-    }
-    return node;
-  }
-});
-const bookEditionResolver = defineSchemaOrgResolver({
-  defaults: {
-    "@type": "Book"
-  },
-  inheritMeta: [
-    "inLanguage"
-  ],
-  resolve(node, ctx) {
-    if (node.bookFormat)
-      node.bookFormat = withBase(node.bookFormat, "https://schema.org/");
-    if (node.datePublished)
-      node.datePublished = resolvableDateToDate(node.datePublished);
-    node.author = resolveRelation(node.author, ctx);
-    return node;
-  },
-  resolveRootNode(node, { find }) {
-    const identity = find(IdentityId);
-    if (identity)
-      setIfEmpty(node, "provider", idReference(identity));
-    return node;
-  }
-});
-const PrimaryBookId = "#book";
-const bookResolver = defineSchemaOrgResolver({
-  defaults: {
-    "@type": "Book"
-  },
-  inheritMeta: [
-    "description",
-    "url",
-    { meta: "title", key: "name" }
-  ],
-  idPrefix: ["url", PrimaryBookId],
-  resolve(node, ctx) {
-    node.workExample = resolveRelation(node.workExample, ctx, bookEditionResolver);
-    node.author = resolveRelation(node.author, ctx);
-    if (node.url)
-      withBase(node.url, ctx.meta.host);
-    return node;
-  },
-  resolveRootNode(node, { find }) {
-    const identity = find(IdentityId);
-    if (identity)
-      setIfEmpty(node, "author", idReference(identity));
-    return node;
-  }
-});
-const commentResolver = defineSchemaOrgResolver({
-  defaults: {
-    "@type": "Comment"
-  },
-  idPrefix: "url",
-  resolve(node, ctx) {
-    node.author = resolveRelation(node.author, ctx, personResolver, {
-      root: true
-    });
-    return node;
-  },
-  resolveRootNode(node, { find }) {
-    const article = find(PrimaryArticleId);
-    if (article)
-      setIfEmpty(node, "about", idReference(article));
-  }
-});
-const courseResolver = defineSchemaOrgResolver({
-  defaults: {
-    "@type": "Course"
-  },
-  resolve(node, ctx) {
-    node.provider = resolveRelation(node.provider, ctx, organizationResolver, {
-      root: true
-    });
-    return node;
-  },
-  resolveRootNode(node, { find }) {
-    const identity = find(IdentityId);
-    if (identity)
-      setIfEmpty(node, "provider", idReference(identity));
-    return node;
-  }
-});
-const placeResolver = defineSchemaOrgResolver({
-  defaults: {
-    "@type": "Place"
-  },
-  resolve(node, ctx) {
-    if (typeof node.address !== "string")
-      node.address = resolveRelation(node.address, ctx, addressResolver);
-    return node;
-  }
-});
-const virtualLocationResolver = defineSchemaOrgResolver({
-  cast(node) {
-    if (typeof node === "string") {
-      return {
-        url: node
-      };
-    }
-    return node;
-  },
-  defaults: {
-    "@type": "VirtualLocation"
-  }
-});
-const PrimaryEventId = "#event";
-const eventResolver = defineSchemaOrgResolver({
-  defaults: {
-    "@type": "Event"
-  },
-  inheritMeta: [
-    "inLanguage",
-    "description",
-    "image",
-    { meta: "title", key: "name" }
-  ],
-  idPrefix: ["url", PrimaryEventId],
-  resolve(node, ctx) {
-    var _a;
-    if (node.location) {
-      const isVirtual = node.location === "string" || ((_a = node.location) == null ? undefined : _a.url) !== "undefined";
-      node.location = resolveRelation(node.location, ctx, isVirtual ? virtualLocationResolver : placeResolver);
-    }
-    node.performer = resolveRelation(node.performer, ctx, personResolver, {
-      root: true
-    });
-    node.organizer = resolveRelation(node.organizer, ctx, organizationResolver, {
-      root: true
-    });
-    node.offers = resolveRelation(node.offers, ctx, offerResolver);
-    if (node.eventAttendanceMode)
-      node.eventAttendanceMode = withBase(node.eventAttendanceMode, "https://schema.org/");
-    if (node.eventStatus)
-      node.eventStatus = withBase(node.eventStatus, "https://schema.org/");
-    const isOnline = node.eventStatus === "https://schema.org/EventMovedOnline";
-    const dates = ["startDate", "previousStartDate", "endDate"];
-    dates.forEach((date) => {
-      if (!isOnline) {
-        if (node[date] instanceof Date && node[date].getHours() === 0 && node[date].getMinutes() === 0)
-          node[date] = resolvableDateToDate(node[date]);
-      } else {
-        node[date] = resolvableDateToIso(node[date]);
-      }
-    });
-    setIfEmpty(node, "endDate", node.startDate);
-    return node;
-  },
-  resolveRootNode(node, { find }) {
-    const identity = find(IdentityId);
-    if (identity)
-      setIfEmpty(node, "organizer", idReference(identity));
-  }
-});
-const openingHoursResolver = defineSchemaOrgResolver({
-  defaults: {
-    "@type": "OpeningHoursSpecification",
-    "opens": "00:00",
-    "closes": "23:59"
-  }
-});
-const localBusinessResolver = defineSchemaOrgResolver({
-  defaults: {
-    "@type": ["Organization", "LocalBusiness"]
-  },
-  inheritMeta: [
-    { key: "url", meta: "host" },
-    { key: "currenciesAccepted", meta: "currency" }
-  ],
-  idPrefix: ["host", IdentityId],
-  resolve(node, ctx) {
-    resolveDefaultType(node, ["Organization", "LocalBusiness"]);
-    node.address = resolveRelation(node.address, ctx, addressResolver);
-    node.openingHoursSpecification = resolveRelation(node.openingHoursSpecification, ctx, openingHoursResolver);
-    node = resolveNode({ ...node }, ctx, organizationResolver);
-    return node;
-  },
-  resolveRootNode(node, ctx) {
-    organizationResolver.resolveRootNode(node, ctx);
-    return node;
-  }
-});
-const ratingResolver = defineSchemaOrgResolver({
-  cast(node) {
-    if (node === "number") {
-      return {
-        ratingValue: node
-      };
-    }
-    return node;
-  },
-  defaults: {
-    "@type": "Rating",
-    "bestRating": 5,
-    "worstRating": 1
-  }
-});
-const foodEstablishmentResolver = defineSchemaOrgResolver({
-  defaults: {
-    "@type": ["Organization", "LocalBusiness", "FoodEstablishment"]
-  },
-  inheritMeta: [
-    { key: "url", meta: "host" },
-    { key: "currenciesAccepted", meta: "currency" }
-  ],
-  idPrefix: ["host", IdentityId],
-  resolve(node, ctx) {
-    resolveDefaultType(node, ["Organization", "LocalBusiness", "FoodEstablishment"]);
-    node.starRating = resolveRelation(node.starRating, ctx, ratingResolver);
-    node = resolveNode(node, ctx, localBusinessResolver);
-    return node;
-  },
-  resolveRootNode(node, ctx) {
-    localBusinessResolver.resolveRootNode(node, ctx);
-    return node;
-  }
-});
-const howToStepDirectionResolver = defineSchemaOrgResolver({
-  cast(node) {
-    if (typeof node === "string") {
-      return {
-        text: node
-      };
-    }
-    return node;
-  },
-  defaults: {
-    "@type": "HowToDirection"
-  }
-});
-const howToStepResolver = defineSchemaOrgResolver({
-  cast(node) {
-    if (typeof node === "string") {
-      return {
-        text: node
-      };
-    }
-    return node;
-  },
-  defaults: {
-    "@type": "HowToStep"
-  },
-  resolve(step, ctx) {
-    if (step.url)
-      step.url = resolveWithBase(ctx.meta.url, step.url);
-    if (step.image) {
-      step.image = resolveRelation(step.image, ctx, imageResolver, {
-        root: true
-      });
-    }
-    if (step.itemListElement)
-      step.itemListElement = resolveRelation(step.itemListElement, ctx, howToStepDirectionResolver);
-    return step;
-  }
-});
-const HowToId = "#howto";
-const howToResolver = defineSchemaOrgResolver({
-  defaults: {
-    "@type": "HowTo"
-  },
-  inheritMeta: [
-    "description",
-    "image",
-    "inLanguage",
-    { meta: "title", key: "name" }
-  ],
-  idPrefix: ["url", HowToId],
-  resolve(node, ctx) {
-    node.step = resolveRelation(node.step, ctx, howToStepResolver);
-    return node;
-  },
-  resolveRootNode(node, { find }) {
-    const webPage = find(PrimaryWebPageId);
-    if (webPage)
-      setIfEmpty(node, "mainEntityOfPage", idReference(webPage));
-  }
-});
-const itemListResolver = defineSchemaOrgResolver({
-  defaults: {
-    "@type": "ItemList"
-  },
-  resolve(node, ctx) {
-    if (node.itemListElement) {
-      let index = 1;
-      node.itemListElement = resolveRelation(node.itemListElement, ctx, listItemResolver, {
-        array: true,
-        afterResolve(node2) {
-          setIfEmpty(node2, "position", index++);
-        }
-      });
-    }
-    return node;
-  }
-});
-const jobPostingResolver = defineSchemaOrgResolver({
-  defaults: {
-    "@type": "JobPosting"
-  },
-  idPrefix: ["url", "#job-posting"],
-  resolve(node, ctx) {
-    node.datePosted = resolvableDateToIso(node.datePosted);
-    node.hiringOrganization = resolveRelation(node.hiringOrganization, ctx, organizationResolver);
-    node.jobLocation = resolveRelation(node.jobLocation, ctx, placeResolver);
-    node.baseSalary = resolveRelation(node.baseSalary, ctx, monetaryAmountResolver);
-    node.validThrough = resolvableDateToIso(node.validThrough);
-    return node;
-  },
-  resolveRootNode(jobPosting, { find }) {
-    const webPage = find(PrimaryWebPageId);
-    const identity = find(IdentityId);
-    if (identity)
-      setIfEmpty(jobPosting, "hiringOrganization", idReference(identity));
-    if (webPage)
-      setIfEmpty(jobPosting, "mainEntityOfPage", idReference(webPage));
-    return jobPosting;
-  }
-});
-const reviewResolver = defineSchemaOrgResolver({
-  defaults: {
-    "@type": "Review"
-  },
-  inheritMeta: [
-    "inLanguage"
-  ],
-  resolve(review, ctx) {
-    review.reviewRating = resolveRelation(review.reviewRating, ctx, ratingResolver);
-    review.author = resolveRelation(review.author, ctx, personResolver);
-    return review;
-  }
-});
-const videoResolver = defineSchemaOrgResolver({
-  cast(input) {
-    if (typeof input === "string") {
-      input = {
-        url: input
-      };
-    }
-    return input;
-  },
-  alias: "video",
-  defaults: {
-    "@type": "VideoObject"
-  },
-  inheritMeta: [
-    { meta: "title", key: "name" },
-    "description",
-    "image",
-    "inLanguage",
-    { meta: "datePublished", key: "uploadDate" }
-  ],
-  idPrefix: "host",
-  resolve(video, ctx) {
-    if (video.uploadDate)
-      video.uploadDate = resolvableDateToIso(video.uploadDate);
-    video.url = resolveWithBase(ctx.meta.host, video.url);
-    if (video.caption && !video.description)
-      video.description = video.caption;
-    if (!video.description)
-      video.description = "No description";
-    if (video.thumbnailUrl && (typeof video.thumbnailUrl === "string" || Array.isArray(video.thumbnailUrl))) {
-      const images = asArray(video.thumbnailUrl).map((image) => resolveWithBase(ctx.meta.host, image));
-      video.thumbnailUrl = images.length > 1 ? images : images[0];
-    }
-    if (video.thumbnail)
-      video.thumbnail = resolveRelation(video.thumbnailUrl, ctx, imageResolver);
-    return video;
-  },
-  resolveRootNode(video, { find }) {
-    var _a;
-    if (video.image && !video.thumbnail) {
-      const firstImage = asArray(video.image)[0];
-      setIfEmpty(video, "thumbnail", (_a = find(firstImage["@id"])) == null ? undefined : _a.url);
-    }
-  }
-});
-const movieResolver = defineSchemaOrgResolver({
-  defaults: {
-    "@type": "Movie"
-  },
-  resolve(node, ctx) {
-    node.aggregateRating = resolveRelation(node.aggregateRating, ctx, aggregateRatingResolver);
-    node.review = resolveRelation(node.review, ctx, reviewResolver);
-    node.director = resolveRelation(node.director, ctx, personResolver);
-    node.actor = resolveRelation(node.actor, ctx, personResolver);
-    node.trailer = resolveRelation(node.trailer, ctx, videoResolver);
-    if (node.dateCreated)
-      node.dateCreated = resolvableDateToDate(node.dateCreated);
-    return node;
-  }
-});
-const ProductId = "#product";
-const productResolver = defineSchemaOrgResolver({
-  defaults: {
-    "@type": "Product"
-  },
-  inheritMeta: [
-    "description",
-    "image",
-    { meta: "title", key: "name" }
-  ],
-  idPrefix: ["url", ProductId],
-  resolve(node, ctx) {
-    setIfEmpty(node, "sku", hash(node.name));
-    node.aggregateOffer = resolveRelation(node.aggregateOffer, ctx, aggregateOfferResolver);
-    node.aggregateRating = resolveRelation(node.aggregateRating, ctx, aggregateRatingResolver);
-    node.offers = resolveRelation(node.offers, ctx, offerResolver);
-    node.review = resolveRelation(node.review, ctx, reviewResolver);
-    return node;
-  },
-  resolveRootNode(product, { find }) {
-    const webPage = find(PrimaryWebPageId);
-    const identity = find(IdentityId);
-    if (identity)
-      setIfEmpty(product, "brand", idReference(identity));
-    if (webPage)
-      setIfEmpty(product, "mainEntityOfPage", idReference(webPage));
-    return product;
-  }
-});
-const answerResolver = defineSchemaOrgResolver({
-  cast(node) {
-    if (typeof node === "string") {
-      return {
-        text: node
-      };
-    }
-    return node;
-  },
-  defaults: {
-    "@type": "Answer"
-  }
-});
-const questionResolver = defineSchemaOrgResolver({
-  defaults: {
-    "@type": "Question"
-  },
-  inheritMeta: [
-    "inLanguage"
-  ],
-  idPrefix: "url",
-  resolve(question, ctx) {
-    if (question.question) {
-      question.name = question.question;
-      delete question.question;
-    }
-    if (question.answer) {
-      question.acceptedAnswer = question.answer;
-      delete question.answer;
-    }
-    question.acceptedAnswer = resolveRelation(question.acceptedAnswer, ctx, answerResolver);
-    return question;
-  },
-  resolveRootNode(question, { find }) {
-    const webPage = find(PrimaryWebPageId);
-    if (webPage && asArray(webPage["@type"]).includes("FAQPage"))
-      dedupeMerge(webPage, "mainEntity", idReference(question));
-  }
-});
-const RecipeId = "#recipe";
-const recipeResolver = defineSchemaOrgResolver({
-  defaults: {
-    "@type": "Recipe"
-  },
-  inheritMeta: [
-    { meta: "title", key: "name" },
-    "description",
-    "image",
-    "datePublished"
-  ],
-  idPrefix: ["url", RecipeId],
-  resolve(node, ctx) {
-    node.recipeInstructions = resolveRelation(node.recipeInstructions, ctx, howToStepResolver);
-    return node;
-  },
-  resolveRootNode(node, { find }) {
-    const article = find(PrimaryArticleId);
-    const webPage = find(PrimaryWebPageId);
-    if (article)
-      setIfEmpty(node, "mainEntityOfPage", idReference(article));
-    else if (webPage)
-      setIfEmpty(node, "mainEntityOfPage", idReference(webPage));
-    if (article == null ? undefined : article.author)
-      setIfEmpty(node, "author", article.author);
-    return node;
-  }
-});
-const softwareAppResolver = defineSchemaOrgResolver({
-  defaults: {
-    "@type": "SoftwareApplication"
-  },
-  resolve(node, ctx) {
-    resolveDefaultType(node, "SoftwareApplication");
-    node.offers = resolveRelation(node.offers, ctx, offerResolver);
-    node.aggregateRating = resolveRelation(node.aggregateRating, ctx, aggregateRatingResolver);
-    node.review = resolveRelation(node.review, ctx, reviewResolver);
-    return node;
-  }
-});
-function defineHeadPlugin(plugin2) {
-  return plugin2;
-}
-function hashCode(s) {
-  let h2 = 9;
-  for (let i2 = 0; i2 < s.length; )
-    h2 = Math.imul(h2 ^ s.charCodeAt(i2++), 9 ** 9);
-  return ((h2 ^ h2 >>> 9) + 65536).toString(16).substring(1, 8).toLowerCase();
-}
-const sepSub = "%separator";
-function sub(p, token, isJson = false) {
-  var _a;
-  let val;
-  if (token === "s" || token === "pageTitle") {
-    val = p.pageTitle;
-  } else if (token.includes(".")) {
-    const dotIndex = token.indexOf(".");
-    val = (_a = p[token.substring(0, dotIndex)]) == null ? undefined : _a[token.substring(dotIndex + 1)];
-  } else {
-    val = p[token];
-  }
-  if (val !== undefined) {
-    return isJson ? (val || "").replace(/"/g, '\\"') : val || "";
-  }
-  return undefined;
-}
-const sepSubRe = new RegExp(`${sepSub}(?:\\s*${sepSub})*`, "g");
-function processTemplateParams(s, p, sep, isJson = false) {
-  if (typeof s !== "string" || !s.includes("%"))
-    return s;
-  let decoded = s;
-  try {
-    decoded = decodeURI(s);
-  } catch {
-  }
-  const tokens = decoded.match(/%\w+(?:\.\w+)?/g);
-  if (!tokens) {
-    return s;
-  }
-  const hasSepSub = s.includes(sepSub);
-  s = s.replace(/%\w+(?:\.\w+)?/g, (token) => {
-    if (token === sepSub || !tokens.includes(token)) {
-      return token;
-    }
-    const re2 = sub(p, token.slice(1), isJson);
-    return re2 !== undefined ? re2 : token;
-  }).trim();
-  if (hasSepSub) {
-    if (s.endsWith(sepSub))
-      s = s.slice(0, -sepSub.length);
-    if (s.startsWith(sepSub))
-      s = s.slice(sepSub.length);
-    s = s.replace(sepSubRe, sep).trim();
-  }
-  return s;
-}
-function loadResolver(resolver2) {
-  switch (resolver2) {
-    case "address":
-      return addressResolver;
-    case "aggregateOffer":
-      return aggregateOfferResolver;
-    case "aggregateRating":
-      return aggregateRatingResolver;
-    case "article":
-      return articleResolver;
-    case "breadcrumb":
-      return breadcrumbResolver;
-    case "comment":
-      return commentResolver;
-    case "event":
-      return eventResolver;
-    case "foodEstablishment":
-      return foodEstablishmentResolver;
-    case "virtualLocation":
-      return virtualLocationResolver;
-    case "place":
-      return placeResolver;
-    case "howTo":
-      return howToResolver;
-    case "howToStep":
-      return howToStepResolver;
-    case "image":
-      return imageResolver;
-    case "localBusiness":
-      return localBusinessResolver;
-    case "offer":
-      return offerResolver;
-    case "openingHours":
-      return openingHoursResolver;
-    case "organization":
-      return organizationResolver;
-    case "person":
-      return personResolver;
-    case "product":
-      return productResolver;
-    case "question":
-      return questionResolver;
-    case "recipe":
-      return recipeResolver;
-    case "review":
-      return reviewResolver;
-    case "video":
-      return videoResolver;
-    case "webPage":
-      return webPageResolver;
-    case "webSite":
-      return webSiteResolver;
-    case "book":
-      return bookResolver;
-    case "course":
-      return courseResolver;
-    case "itemList":
-      return itemListResolver;
-    case "jobPosting":
-      return jobPostingResolver;
-    case "listItem":
-      return listItemResolver;
-    case "movie":
-      return movieResolver;
-    case "searchAction":
-      return searchActionResolver;
-    case "readAction":
-      return readActionResolver;
-    case "softwareApp":
-      return softwareAppResolver;
-    case "bookEdition":
-      return bookEditionResolver;
-  }
-  return null;
-}
-const resolver = {
-  __proto__: null,
-  loadResolver
-};
-function resolveMeta(meta) {
-  if (!meta.host && meta.canonicalHost)
-    meta.host = meta.canonicalHost;
-  if (!meta.tagPosition && meta.position)
-    meta.tagPosition = meta.position;
-  if (!meta.currency && meta.defaultCurrency)
-    meta.currency = meta.defaultCurrency;
-  if (!meta.inLanguage && meta.defaultLanguage)
-    meta.inLanguage = meta.defaultLanguage;
-  if (!meta.path)
-    meta.path = "/";
-  if (!meta.host && false)
-    meta.host = (undefined).location.host;
-  if (!meta.url && meta.canonicalUrl)
-    meta.url = meta.canonicalUrl;
-  if (meta.path !== "/") {
-    if (meta.trailingSlash && !hasTrailingSlash(meta.path))
-      meta.path = withTrailingSlash(meta.path);
-    else if (!meta.trailingSlash && hasTrailingSlash(meta.path))
-      meta.path = withoutTrailingSlash(meta.path);
-  }
-  meta.url = joinURL(meta.host || "", meta.path);
-  return {
-    ...meta,
-    host: meta.host,
-    url: meta.url,
-    currency: meta.currency,
-    image: meta.image,
-    inLanguage: meta.inLanguage,
-    title: meta.title,
-    description: meta.description,
-    datePublished: meta.datePublished,
-    dateModified: meta.dateModified
-  };
-}
-function resolveNode(node, ctx, resolver2) {
-  var _a;
-  if (resolver2 == null ? undefined : resolver2.cast)
-    node = resolver2.cast(node, ctx);
-  if (resolver2 == null ? undefined : resolver2.defaults) {
-    let defaults = resolver2.defaults || {};
-    if (typeof defaults === "function")
-      defaults = defaults(ctx);
-    node = {
-      ...defaults,
-      ...node
-    };
-  }
-  (_a = resolver2.inheritMeta) == null ? undefined : _a.forEach((entry2) => {
-    if (typeof entry2 === "string")
-      setIfEmpty(node, entry2, ctx.meta[entry2]);
-    else
-      setIfEmpty(node, entry2.key, ctx.meta[entry2.meta]);
-  });
-  if (resolver2 == null ? undefined : resolver2.resolve)
-    node = resolver2.resolve(node, ctx);
-  for (const k2 in node) {
-    const v2 = node[k2];
-    if (typeof v2 === "object" && (v2 == null ? undefined : v2._resolver))
-      node[k2] = resolveRelation(v2, ctx, v2._resolver);
-  }
-  stripEmptyProperties(node);
-  return node;
-}
-function resolveNodeId(node, ctx, resolver2, resolveAsRoot = false) {
-  var _a, _b, _c, _d;
-  if (node["@id"] && node["@id"].startsWith("http"))
-    return node;
-  const prefix = resolver2 ? (Array.isArray(resolver2.idPrefix) ? resolver2.idPrefix[0] : resolver2.idPrefix) || "url" : "url";
-  const rootId = node["@id"] || (resolver2 ? Array.isArray(resolver2.idPrefix) ? (_a = resolver2.idPrefix) == null ? undefined : _a[1] : undefined : "");
-  if (!node["@id"] && resolveAsRoot && rootId) {
-    node["@id"] = prefixId(ctx.meta[prefix], rootId);
-    return node;
-  }
-  if (((_b = node["@id"]) == null ? undefined : _b.startsWith("#/schema/")) || ((_c = node["@id"]) == null ? undefined : _c.startsWith("/"))) {
-    node["@id"] = prefixId(ctx.meta[prefix], node["@id"]);
-    return node;
-  }
-  let alias = resolver2 == null ? undefined : resolver2.alias;
-  if (!alias) {
-    const type = ((_d = asArray(node["@type"])) == null ? undefined : _d[0]) || "";
-    alias = type.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase();
-  }
-  const hashNodeData = {};
-  for (const key in node) {
-    if (key[0] === "_") {
-      continue;
-    }
-    if (!Object.prototype.hasOwnProperty.call(node, key)) {
-      continue;
-    }
-    hashNodeData[key] = node[key];
-  }
-  node["@id"] = prefixId(ctx.meta[prefix], `#/schema/${alias}/${node["@id"] || hashCode(JSON.stringify(hashNodeData))}`);
-  return node;
-}
-function resolveRelation(input, ctx, fallbackResolver, options = {}) {
-  if (!input)
-    return input;
-  const ids = asArray(input).map((a) => {
-    var _a;
-    const keys = Object.keys(a).length;
-    if (keys === 1 && a["@id"] || keys === 2 && a["@id"] && a["@type"]) {
-      return resolveNodeId({
-        // we drop @type
-        "@id": ((_a = ctx.find(a["@id"])) == null ? undefined : _a["@id"]) || a["@id"]
-      }, ctx);
-    }
-    let resolver2 = fallbackResolver;
-    if (a._resolver) {
-      resolver2 = a._resolver;
-      if (typeof resolver2 === "string")
-        resolver2 = loadResolver(resolver2);
-      delete a._resolver;
-    }
-    if (!resolver2)
-      return a;
-    let node = resolveNode(a, ctx, resolver2);
-    if (options.afterResolve)
-      options.afterResolve(node);
-    if (options.generateId || options.root)
-      node = resolveNodeId(node, ctx, resolver2, false);
-    if (options.root) {
-      if (resolver2.resolveRootNode)
-        resolver2.resolveRootNode(node, ctx);
-      ctx.push(node);
-      return idReference(node["@id"]);
-    }
-    return node;
-  });
-  if (!options.array && ids.length === 1)
-    return ids[0];
-  return ids;
-}
-function isPlainObject(value) {
-  if (value === null || typeof value !== "object") {
-    return false;
-  }
-  const prototype = Object.getPrototypeOf(value);
-  if (prototype !== null && prototype !== Object.prototype && Object.getPrototypeOf(prototype) !== null) {
-    return false;
-  }
-  if (Symbol.iterator in value) {
-    return false;
-  }
-  if (Symbol.toStringTag in value) {
-    return Object.prototype.toString.call(value) === "[object Module]";
-  }
-  return true;
-}
-function _defu(baseObject, defaults, namespace = ".", merger) {
-  if (!isPlainObject(defaults)) {
-    return _defu(baseObject, {}, namespace, merger);
-  }
-  const object = Object.assign({}, defaults);
-  for (const key in baseObject) {
-    if (key === "__proto__" || key === "constructor") {
-      continue;
-    }
-    const value = baseObject[key];
-    if (value === null || value === undefined) {
-      continue;
-    }
-    if (merger && merger(object, key, value, namespace)) {
-      continue;
-    }
-    if (Array.isArray(value) && Array.isArray(object[key])) {
-      object[key] = [...value, ...object[key]];
-    } else if (isPlainObject(value) && isPlainObject(object[key])) {
-      object[key] = _defu(
-        value,
-        object[key],
-        (namespace ? `${namespace}.` : "") + key.toString(),
-        merger
-      );
-    } else {
-      object[key] = value;
-    }
-  }
-  return object;
-}
-function createDefu(merger) {
-  return (...arguments_) => (
-    // eslint-disable-next-line unicorn/no-array-reduce
-    arguments_.reduce((p, c2) => _defu(p, c2, "", merger), {})
-  );
-}
-const defu = createDefu();
-function groupBy(array, predicate) {
-  return array.reduce((acc, value, index, array2) => {
-    const key = predicate(value, index, array2);
-    if (!acc[key])
-      acc[key] = [];
-    acc[key].push(value);
-    return acc;
-  }, {});
-}
-function uniqueBy(array, predicate) {
-  return Object.values(groupBy(array, predicate)).map((a) => a[a.length - 1]);
-}
-const merge = createDefu((object, key, value) => {
-  if (Array.isArray(object[key])) {
-    if (Array.isArray(value)) {
-      const map = {};
-      for (const item of [...object[key], ...value])
-        map[hash(item)] = item;
-      object[key] = Object.values(map);
-      if (key === "itemListElement") {
-        object[key] = [...uniqueBy(object[key], (item) => item.position)];
-      }
-      return true;
-    }
-    object[key] = merge(object[key], Array.isArray(value) ? value : [value]);
-    return true;
-  }
-});
-function dedupeNodes(nodes) {
-  const dedupedNodes = {};
-  for (const key of nodes.keys()) {
-    const n = nodes[key];
-    const nodeKey = resolveAsGraphKey(n["@id"] || hash(n));
-    if (dedupedNodes[nodeKey] && n._dedupeStrategy !== "replace")
-      dedupedNodes[nodeKey] = merge(nodes[key], dedupedNodes[nodeKey]);
-    else
-      dedupedNodes[nodeKey] = nodes[key];
-  }
-  return Object.values(dedupedNodes);
-}
-function normaliseNodes(nodes) {
-  const sortedNodeKeys = nodes.keys();
-  const dedupedNodes = {};
-  for (const key of sortedNodeKeys) {
-    const n = nodes[key];
-    const nodeKey = resolveAsGraphKey(n["@id"] || hash(n));
-    const groupedKeys = groupBy(Object.keys(n), (key2) => {
-      const val = n[key2];
-      if (key2[0] === "_")
-        return "ignored";
-      if (Array.isArray(val) || typeof val === "object")
-        return "relations";
-      return "primitives";
-    });
-    const keys = [
-      ...(groupedKeys.primitives || []).sort(),
-      ...(groupedKeys.relations || []).sort()
-    ];
-    let newNode = {};
-    for (const key2 of keys)
-      newNode[key2] = n[key2];
-    if (dedupedNodes[nodeKey])
-      newNode = merge(newNode, dedupedNodes[nodeKey]);
-    dedupedNodes[nodeKey] = newNode;
-  }
-  return Object.values(dedupedNodes);
-}
-const baseRelationNodes = [
-  "translationOfWork",
-  "workTranslation"
-];
-function createSchemaOrgGraph() {
-  const ctx = {
-    find(id) {
-      let resolver2 = (s) => s;
-      if (id[0] === "#") {
-        resolver2 = resolveAsGraphKey;
-      } else if (id[0] === "/") {
-        resolver2 = (s) => s.replace(/(https?:)?\/\//, "").split("/")[0];
-      }
-      const key = resolver2(id);
-      return ctx.nodes.filter((n) => !!n["@id"]).find((n) => resolver2(n["@id"]) === key);
-    },
-    push(input) {
-      asArray(input).forEach((node) => {
-        const registeredNode = node;
-        ctx.nodes.push(registeredNode);
-      });
-    },
-    resolveGraph(meta) {
-      ctx.meta = resolveMeta({ ...meta });
-      ctx.nodes.forEach((node, key) => {
-        const resolver2 = node._resolver;
-        if (resolver2) {
-          node = resolveNode(node, ctx, resolver2);
-          node = resolveNodeId(node, ctx, resolver2, true);
-        }
-        ctx.nodes[key] = node;
-      });
-      ctx.nodes = dedupeNodes(ctx.nodes);
-      ctx.nodes.forEach((node) => {
-        var _a;
-        if (node.image && typeof node.image === "string") {
-          node.image = resolveRelation(node.image, ctx, imageResolver, {
-            root: true
-          });
-        }
-        baseRelationNodes.forEach((k2) => {
-          node[k2] = resolveRelation(node[k2], ctx);
-        });
-        if ((_a = node._resolver) == null ? undefined : _a.resolveRootNode)
-          node._resolver.resolveRootNode(node, ctx);
-        delete node._resolver;
-      });
-      return normaliseNodes(ctx.nodes);
-    },
-    nodes: [],
-    meta: {}
-  };
-  return ctx;
-}
-function SchemaOrgUnheadPlugin(config, meta, options) {
-  config = resolveMeta({ ...config });
-  let graph;
-  let resolvedMeta = {};
-  return defineHeadPlugin((head) => ({
-    key: "schema-org",
-    hooks: {
-      "entries:resolve": () => {
-        graph = createSchemaOrgGraph();
-      },
-      "tag:normalise": async ({ tag }) => {
-        if (tag.tag === "script" && tag.props.type === "application/ld+json" && tag.props.nodes) {
-          const { loadResolver: loadResolver2 } = await Promise.resolve().then(function() {
-            return resolver;
-          });
-          const nodes = await tag.props.nodes;
-          for (const node of Array.isArray(nodes) ? nodes : [nodes]) {
-            if (typeof node !== "object" || Object.keys(node).length === 0) {
-              continue;
-            }
-            const newNode = {
-              ...node,
-              _dedupeStrategy: tag.tagDuplicateStrategy,
-              _resolver: loadResolver2(await node._resolver)
-            };
-            graph.push(newNode);
-          }
-          tag.tagPosition = tag.tagPosition || config.tagPosition === "head" ? "head" : "bodyClose";
-        }
-        if (tag.tag === "htmlAttrs" && tag.props.lang) {
-          resolvedMeta.inLanguage = tag.props.lang;
-        } else if (tag.tag === "title") {
-          resolvedMeta.title = tag.textContent;
-        } else if (tag.tag === "meta" && tag.props.name === "description") {
-          resolvedMeta.description = tag.props.content;
-        } else if (tag.tag === "link" && tag.props.rel === "canonical") {
-          resolvedMeta.url = tag.props.href;
-          if (resolvedMeta.url && !resolvedMeta.host) {
-            try {
-              resolvedMeta.host = new URL(resolvedMeta.url).origin;
-            } catch {
-            }
-          }
-        } else if (tag.tag === "meta" && tag.props.property === "og:image") {
-          resolvedMeta.image = tag.props.content;
-        } else if (tag.tag === "templateParams" && tag.props.schemaOrg) {
-          resolvedMeta = {
-            ...resolvedMeta,
-            // @ts-expect-error untyped
-            ...tag.props.schemaOrg
-          };
-          delete tag.props.schemaOrg;
-        }
-      },
-      "tags:resolve": async (ctx) => {
-        for (const k2 in ctx.tags) {
-          const tag = ctx.tags[k2];
-          if (tag.tag === "script" && tag.props.type === "application/ld+json" && tag.props.nodes) {
-            delete tag.props.nodes;
-            const resolvedGraph = graph.resolveGraph({ ...await (meta == null ? undefined : meta()) || {}, ...config, ...resolvedMeta });
-            if (!resolvedGraph.length) {
-              tag.props = {};
-              return;
-            }
-            (options == null ? undefined : options.minify) || "production" === "production";
-            tag.innerHTML = JSON.stringify({
-              "@context": "https://schema.org",
-              "@graph": resolvedGraph
-            }, (_2, value) => {
-              if (typeof value !== "object")
-                return processTemplateParams(value, head._templateParams, head._separator);
-              return value;
-            }, 0 );
-            return;
-          }
-        }
-      },
-      "tags:afterResolve": (ctx) => {
-        let firstNodeKey;
-        for (const k2 in ctx.tags) {
-          const tag = ctx.tags[k2];
-          if (tag.props.type === "application/ld+json" && tag.props.nodes || tag.key === "schema-org-graph") {
-            delete tag.props.nodes;
-            if (typeof firstNodeKey === "undefined") {
-              firstNodeKey = k2;
-              continue;
-            }
-            ctx.tags[firstNodeKey].props = defu(ctx.tags[firstNodeKey].props, tag.props);
-            delete ctx.tags[firstNodeKey].props.nodes;
-            ctx.tags[k2] = false;
-          }
-        }
-        ctx.tags = ctx.tags.filter(Boolean);
-      }
-    }
-  }));
-}
-function provideResolver(input, resolver2) {
-  if (!input)
-    input = {};
-  input._resolver = resolver2;
-  return input;
-}
-function defineWebPage(input) {
-  return provideResolver(input, "webPage");
-}
-function defineWebSite(input) {
-  return provideResolver(input, "webSite");
 }
 function resolveSitePath(pathOrUrl, options) {
   let path = pathOrUrl;
@@ -3225,9 +1623,10 @@ function fixSlashes(trailingSlash, pathOrUrl) {
   return `${$url.protocol ? `${$url.protocol}//` : ""}${$url.host || ""}${fixedPath}${$url.search || ""}${$url.hash || ""}`;
 }
 function useNitroOrigin(e) {
+  var _a;
   {
     e = e || useRequestEvent();
-    return e.context.siteConfigNitroOrigin;
+    return ((_a = e == null ? undefined : e.context) == null ? undefined : _a.siteConfigNitroOrigin) || "";
   }
 }
 function createSitePathResolver(options = {}) {
@@ -3306,7 +1705,7 @@ function maybeAddIdentitySchemaOrg() {
     };
     let identityType;
     if (typeof identity !== "string") {
-      identityPayload = defu$1(identity, identityPayload);
+      identityPayload = defu(identity, identityPayload);
       identityType = identity.type;
       delete identityPayload.type;
     } else {
@@ -3346,7 +1745,7 @@ const init_8zxuXEdLTw = /* @__PURE__ */ defineNuxtPlugin({
     initPlugin(nuxtApp);
   }
 });
-const componentNames = [{ "hash": "i0Vxmj8bqg", "pascalName": "BrandedLogo", "kebabName": "branded-logo", "category": "community", "credits": "Full Stack Heroes <https://fullstackheroes.com/>" }, { "hash": "tBHg51xiAt", "pascalName": "Frame", "kebabName": "frame", "category": "community", "credits": "@arashsheyda <https://github.com/arashsheyda>" }, { "hash": "Sqc3OTP2KQ", "pascalName": "Nuxt", "kebabName": "nuxt", "category": "community", "credits": "NuxtLabs <https://nuxtlabs.com/>" }, { "hash": "ZZYBOVCtCQ", "pascalName": "NuxtSeo", "kebabName": "nuxt-seo", "category": "community", "credits": "Nuxt SEO <https://nuxtseo.com/>" }, { "hash": "q432NYEB0T", "pascalName": "Pergel", "kebabName": "pergel", "category": "community", "credits": "Pergel <https://nuxtlabs.com/>" }, { "hash": "6bQOH7FKu2", "pascalName": "SimpleBlog", "kebabName": "simple-blog", "category": "community", "credits": "Full Stack Heroes <https://fullstackheroes.com/>" }, { "hash": "wt558K6QyQ", "pascalName": "UnJs", "kebabName": "un-js", "category": "community", "credits": "UnJS <https://unjs.io/>" }, { "hash": "6RdQZcuwZZ", "pascalName": "Wave", "kebabName": "wave", "category": "community", "credits": "Full Stack Heroes <https://fullstackheroes.com/>" }, { "hash": "gaB1TrbtTl", "pascalName": "WithEmoji", "kebabName": "with-emoji", "category": "community", "credits": "Full Stack Heroes <https://fullstackheroes.com/>" }];
+const componentNames = [{ "hash": "i0Vxmj8bqg", "pascalName": "BrandedLogo", "kebabName": "branded-logo", "category": "community", "credits": "Full Stack Heroes <https://fullstackheroes.com/>" }, { "hash": "tBHg51xiAt", "pascalName": "Frame", "kebabName": "frame", "category": "community", "credits": "@arashsheyda <https://github.com/arashsheyda>" }, { "hash": "Sqc3OTP2KQ", "pascalName": "Nuxt", "kebabName": "nuxt", "category": "community", "credits": "NuxtLabs <https://nuxtlabs.com/>" }, { "hash": "Zi7JFRq3ez", "pascalName": "NuxtSeo", "kebabName": "nuxt-seo", "category": "community", "credits": "Nuxt SEO <https://nuxtseo.com/>" }, { "hash": "q432NYEB0T", "pascalName": "Pergel", "kebabName": "pergel", "category": "community", "credits": "Pergel <https://nuxtlabs.com/>" }, { "hash": "6bQOH7FKu2", "pascalName": "SimpleBlog", "kebabName": "simple-blog", "category": "community", "credits": "Full Stack Heroes <https://fullstackheroes.com/>" }, { "hash": "wt558K6QyQ", "pascalName": "UnJs", "kebabName": "un-js", "category": "community", "credits": "UnJS <https://unjs.io/>" }, { "hash": "6RdQZcuwZZ", "pascalName": "Wave", "kebabName": "wave", "category": "community", "credits": "Full Stack Heroes <https://fullstackheroes.com/>" }, { "hash": "gaB1TrbtTl", "pascalName": "WithEmoji", "kebabName": "with-emoji", "category": "community", "credits": "Full Stack Heroes <https://fullstackheroes.com/>" }];
 function isInternalRoute(path) {
   return path.startsWith("/_") || path.startsWith("@");
 }
@@ -3375,7 +1774,7 @@ function filterIsOgImageOption(key) {
 }
 function separateProps(options, ignoreKeys = []) {
   options = options || {};
-  const _props = defu$1(options.props, Object.fromEntries(
+  const _props = defu(options.props, Object.fromEntries(
     Object.entries({ ...options }).filter(([k2]) => !filterIsOgImageOption(k2) && !ignoreKeys.includes(k2))
   ));
   const props = {};
@@ -3425,14 +1824,24 @@ function generateMeta(url, resolvedOptions) {
 }
 function getOgImagePath(pagePath, _options) {
   const baseURL2 = (/* @__PURE__ */ useRuntimeConfig()).app.baseURL;
-  const options = defu$1(_options, useOgImageRuntimeConfig().defaults);
-  return joinURL("/", baseURL2, `__og-image__/${"image"}`, pagePath, `og.${options.extension}`);
+  const options = defu(_options, useOgImageRuntimeConfig().defaults);
+  const path = joinURL("/", baseURL2, `__og-image__/${"image"}`, pagePath, `og.${options.extension}`);
+  if (Object.keys(options._query || {}).length) {
+    return withQuery(path, options._query);
+  }
+  return path;
 }
 function useOgImageRuntimeConfig() {
-  return (/* @__PURE__ */ useRuntimeConfig())["nuxt-og-image"];
+  const c2 = /* @__PURE__ */ useRuntimeConfig();
+  return {
+    ...c2["nuxt-og-image"],
+    app: {
+      baseURL: c2.app.baseURL
+    }
+  };
 }
 function createOgImageMeta(src, input, resolvedOptions, ssrContext) {
-  const _input = separateProps(defu$1(input, ssrContext._ogImagePayload));
+  const _input = separateProps(defu(input, ssrContext._ogImagePayload));
   let url = src || input.url || resolvedOptions.url;
   if (!url)
     return;
@@ -3498,6 +1907,7 @@ function ogImageCanonicalUrls(nuxtApp) {
       key: "nuxt-og-image:overrides-and-canonical-urls",
       hooks: {
         "tags:resolve": async (ctx2) => {
+          var _a;
           const hasPrimaryPayload = ctx2.tags.some((tag) => tag.tag === "script" && tag.props.id === "nuxt-og-image-options");
           let overrides;
           for (const tag of ctx2.tags) {
@@ -3516,7 +1926,11 @@ function ogImageCanonicalUrls(nuxtApp) {
           ctx2.tags = ctx2.tags.filter(Boolean);
           for (const tag of ctx2.tags) {
             if (tag.tag === "meta" && (tag.props.property === "og:image" || ["twitter:image:src", "twitter:image"].includes(tag.props.name))) {
-              if (!tag.props.content.startsWith("https")) {
+              if (!tag.props.content) {
+                tag.props = {};
+                continue;
+              }
+              if (!((_a = tag.props.content) == null ? undefined : _a.startsWith("https"))) {
                 await nuxtApp.runWithContext(() => {
                   tag.props.content = toValue(withSiteUrl(tag.props.content, {
                     withBase: true
@@ -3524,7 +1938,7 @@ function ogImageCanonicalUrls(nuxtApp) {
                 });
               }
             } else if (overrides && tag.tag === "script" && tag.props.id === "nuxt-og-image-options") {
-              tag.innerHTML = stringify(defu$1(overrides, parse(tag.innerHTML)));
+              tag.innerHTML = stringify(defu(overrides, parse(tag.innerHTML)));
             }
           }
         }
@@ -3543,7 +1957,7 @@ function routeRuleOgImage(nuxtApp) {
     const _routeRulesMatcher = toRouteMatcher(
       createRouter$1({ routes: (_b = (_a = ssrContext == null ? undefined : ssrContext.runtimeConfig) == null ? undefined : _a.nitro) == null ? undefined : _b.routeRules })
     );
-    let routeRules = defu$1({}, ..._routeRulesMatcher.matchAll(
+    let routeRules = defu({}, ..._routeRulesMatcher.matchAll(
       withoutBase(path.split("?")[0], (_c = ssrContext == null ? undefined : ssrContext.runtimeConfig) == null ? undefined : _c.app.baseURL)
     ).reverse()).ogImage;
     if (typeof routeRules === "undefined")
@@ -3558,10 +1972,10 @@ function routeRuleOgImage(nuxtApp) {
       return;
     }
     const { defaults } = useOgImageRuntimeConfig();
-    routeRules = normaliseOptions(defu$1((_f = (_e2 = (_d = nuxtApp.ssrContext) == null ? undefined : _d.event.context._nitro) == null ? undefined : _e2.routeRules) == null ? undefined : _f.ogImage, routeRules, {
+    routeRules = normaliseOptions(defu((_f = (_e2 = (_d = nuxtApp.ssrContext) == null ? undefined : _d.event.context._nitro) == null ? undefined : _e2.routeRules) == null ? undefined : _f.ogImage, routeRules, {
       component: defaults.component
     }));
-    const resolvedOptions = normaliseOptions(defu$1(routeRules, defaults));
+    const resolvedOptions = normaliseOptions(defu(routeRules, defaults));
     const src = getOgImagePath(ssrContext.url, resolvedOptions);
     createOgImageMeta(src, routeRules, resolvedOptions, nuxtApp.ssrContext);
   });
@@ -3636,17 +2050,11 @@ var O = class {
     this.storeJwt = null;
   }
   registerJwt(e, s) {
-    if (s === "admin") this.adminJwt = e;
-    else if (s === "store") this.storeJwt = e;
-    else throw new Error(`'domain' must be wither 'admin' or 'store' received ${s}`);
   }
   getJwt(e) {
-    if (e === "admin") return this.adminJwt;
-    if (e === "store") return this.storeJwt;
-    throw new Error(`'domain' must be wither 'admin' or 'store' received ${e}`);
   }
 }, u = new O();
-var Ys = { "/admin/auth": "POST", "/admin/users/password-token": "POST", "/admin/users/reset-password": "POST", "/admin/invites/accept": "POST" }, es = { maxRetries: 0, baseUrl: "http://localhost:9000" }, $ = class {
+var Zs = { "/admin/auth": "POST", "/admin/users/password-token": "POST", "/admin/users/reset-password": "POST", "/admin/invites/accept": "POST" }, es = { maxRetries: 0, baseUrl: "http://localhost:9000" }, $ = class {
   constructor(e) {
     this.axiosClient = this.createClient({ ...es, ...e }), this.config = { ...es, ...e };
   }
@@ -3660,7 +2068,7 @@ var Ys = { "/admin/auth": "POST", "/admin/users/password-token": "POST", "/admin
     return e.split("-").map((s) => s.charAt(0).toUpperCase() + s.substr(1).toLowerCase()).join("-");
   }
   requiresAuthentication(e, s) {
-    return e.startsWith("/admin") && Ys[e] !== s;
+    return e.startsWith("/admin") && Zs[e] !== s;
   }
   setHeaders(e, s, t, r = {}) {
     let n = { Accept: "application/json", "Content-Type": "application/json" };
@@ -3671,7 +2079,7 @@ var Ys = { "/admin/auth": "POST", "/admin/users/password-token": "POST", "/admin
     return d && (n["x-publishable-api-key"] = d), this.config.maxRetries > 0 && s === "POST" && (n["Idempotency-Key"] = v4()), Object.assign({}, n, this.normalizeHeaders(e), r);
   }
   createClient(e) {
-    let s = Qs.create({ baseURL: e.baseUrl, adapter: e.axiosAdapter });
+    let s = Xs.create({ baseURL: e.baseUrl, adapter: e.axiosAdapter });
     return h.attach(s), s.defaults.raxConfig = { instance: s, retry: e.maxRetries, backoffType: "exponential", shouldRetry: (t) => {
       let r = h.getConfig(t);
       return r ? this.shouldRetryCondition(t, r.currentRetryAttempt ?? 1, r.retry ?? 3) : false;
@@ -3681,8 +2089,8 @@ var Ys = { "/admin/auth": "POST", "/admin/users/password-token": "POST", "/admin
     n = { ...this.config.customHeaders, ...n };
     let a = { method: e, withCredentials: true, url: s, json: true, headers: this.setHeaders(r, e, s, n) };
     ["POST", "DELETE"].includes(e) && (a.data = t);
-    let { data: d, ...Ws } = await this.axiosClient(a);
-    return { ...d, response: Ws };
+    let { data: d, ...Qs } = await this.axiosClient(a);
+    return { ...d, response: Qs };
   }
 }, ss = $;
 var i = class {
@@ -4905,9 +3313,13 @@ var Ke = class extends i {
     let t = `/admin/regions/${e}`;
     return this.client.request("DELETE", t, undefined, {}, s);
   }
-  retrieve(e, s = {}) {
-    let t = `/admin/regions/${e}`;
-    return this.client.request("GET", t, undefined, {}, s);
+  retrieve(e, s, t = {}) {
+    let r = `/admin/regions/${e}`;
+    if (s) {
+      let n = c.stringify(s);
+      r = `/admin/regions/${e}?${n}`;
+    }
+    return this.client.request("GET", r, undefined, {}, t);
   }
   list(e, s = {}) {
     let t = "/admin/regions";
@@ -4941,7 +3353,7 @@ var Ke = class extends i {
     let r = `/admin/regions/${e}/payment-providers/${s}`;
     return this.client.request("DELETE", r, undefined, {}, t);
   }
-}, ws = Ke;
+}, Is = Ke;
 var Ne = class extends i {
   retrieve(e, s = {}) {
     let t = `/admin/reservations/${e}`;
@@ -4967,7 +3379,7 @@ var Ne = class extends i {
     let t = `/admin/reservations/${e}`;
     return this.client.request("DELETE", t, undefined, {}, s);
   }
-}, Is = Ne;
+}, Bs = Ne;
 var Ve = class extends i {
   create(e, s = {}) {
     let t = "/admin/return-reasons";
@@ -4989,7 +3401,7 @@ var Ve = class extends i {
     let s = "/admin/return-reasons";
     return this.client.request("GET", s, undefined, {}, e);
   }
-}, Bs = Ve;
+}, ks = Ve;
 var Fe = class extends i {
   cancel(e, s = {}) {
     let t = `/admin/returns/${e}/cancel`;
@@ -5003,7 +3415,7 @@ var Fe = class extends i {
     let t = "/admin/returns/";
     return e && (t = `/admin/returns?${c.stringify(e)}`), this.client.request("GET", t, undefined, {}, s);
   }
-}, ks = Fe;
+}, Us = Fe;
 var Je = class extends i {
   retrieve(e, s = {}) {
     let t = `/admin/sales-channels/${e}`;
@@ -5045,7 +3457,7 @@ var Je = class extends i {
     let r = `/admin/sales-channels/${e}/stock-locations`;
     return this.client.request("DELETE", r, s, {}, t);
   }
-}, Us = Je;
+}, Ks = Je;
 var Me = class extends i {
   create(e, s = {}) {
     let t = "/admin/shipping-options";
@@ -5067,7 +3479,7 @@ var Me = class extends i {
     let t = "/admin/shipping-options";
     return e && (t = `/admin/shipping-options?${c.stringify(e)}`), this.client.request("GET", t, undefined, {}, s);
   }
-}, Ks = Me;
+}, Ns = Me;
 var ze = class extends i {
   create(e, s = {}) {
     let t = "/admin/shipping-profiles/";
@@ -5089,7 +3501,7 @@ var ze = class extends i {
     let s = "/admin/shipping-profiles/";
     return this.client.request("GET", s, undefined, {}, e);
   }
-}, Ns = ze;
+}, Vs = ze;
 var He = class extends i {
   create(e, s = {}) {
     let t = "/admin/stock-locations";
@@ -5115,7 +3527,7 @@ var He = class extends i {
     }
     return this.client.request("GET", t, undefined, {}, s);
   }
-}, Vs = He;
+}, Fs = He;
 var je = class extends i {
   update(e, s = {}) {
     let t = "/admin/store/";
@@ -5141,7 +3553,7 @@ var je = class extends i {
     let s = "/admin/store/tax-providers";
     return this.client.request("GET", s, undefined, {}, e);
   }
-}, Fs = je;
+}, Js = je;
 var _e = class extends i {
   retrieve(e, s = {}) {
     let t = `/admin/swaps/${e}`;
@@ -5151,7 +3563,7 @@ var _e = class extends i {
     let t = "/admin/swaps/";
     return e && (t = `/admin/swaps?${c.stringify(e)}`), this.client.request("GET", t, undefined, {}, s);
   }
-}, Js = _e;
+}, Ms = _e;
 var We = class extends i {
   retrieve(e, s, t = {}) {
     let r = `/admin/tax-rates/${e}`;
@@ -5229,7 +3641,7 @@ var We = class extends i {
     let t = `/admin/tax-rates/${e}`;
     return this.client.request("DELETE", t, undefined, {}, s);
   }
-}, Ms = We;
+}, zs = We;
 var Qe = class extends i {
   constructor() {
     super(...arguments);
@@ -5255,7 +3667,7 @@ var Qe = class extends i {
     let t = new FormData();
     return Array.isArray(s) ? s.forEach((r) => t.append("files", r)) : t.append("files", s), t;
   }
-}, zs = Qe;
+}, Hs = Qe;
 var Xe = class extends i {
   sendResetPasswordToken(e, s = {}) {
     let t = "/admin/users/password-token";
@@ -5289,7 +3701,7 @@ var Xe = class extends i {
     }
     return this.client.request("GET", t, undefined, {}, s);
   }
-}, Hs = Xe;
+}, js = Xe;
 var Ye = class extends i {
   list(e, s = {}) {
     let t = "/admin/variants";
@@ -5303,7 +3715,7 @@ var Ye = class extends i {
     let t = `/admin/variants/${e}/inventory`;
     return this.client.request("GET", t, undefined, {}, s);
   }
-}, _s = Ye;
+}, Ws = Ye;
 var f = class extends i {
   constructor() {
     super(...arguments);
@@ -5323,24 +3735,24 @@ var f = class extends i {
     this.products = new Ds(this.client);
     this.productTags = new Ls(this.client);
     this.productTypes = new xs(this.client);
-    this.users = new Hs(this.client);
-    this.returns = new ks(this.client);
+    this.users = new js(this.client);
+    this.returns = new Us(this.client);
     this.orders = new qs(this.client);
     this.orderEdits = new As(this.client);
     this.publishableApiKeys = new vs(this.client);
-    this.returnReasons = new Bs(this.client);
-    this.variants = new _s(this.client);
-    this.salesChannels = new Us(this.client);
-    this.swaps = new Js(this.client);
-    this.shippingProfiles = new Ns(this.client);
-    this.stockLocations = new Vs(this.client);
-    this.store = new Fs(this.client);
-    this.shippingOptions = new Ks(this.client);
-    this.regions = new ws(this.client);
-    this.reservations = new Is(this.client);
+    this.returnReasons = new ks(this.client);
+    this.variants = new Ws(this.client);
+    this.salesChannels = new Ks(this.client);
+    this.swaps = new Ms(this.client);
+    this.shippingProfiles = new Vs(this.client);
+    this.stockLocations = new Fs(this.client);
+    this.store = new Js(this.client);
+    this.shippingOptions = new Ns(this.client);
+    this.regions = new Is(this.client);
+    this.reservations = new Bs(this.client);
     this.notifications = new gs(this.client);
-    this.taxRates = new Ms(this.client);
-    this.uploads = new zs(this.client);
+    this.taxRates = new zs(this.client);
+    this.uploads = new Hs(this.client);
     this.paymentCollections = new Ss(this.client);
     this.payments = new Ts(this.client);
     this.productCategories = new Es(this.client);
@@ -5371,7 +3783,7 @@ const _1_absoluteImageUrls_server_zDt3Q5SdZ4 = /* @__PURE__ */ defineNuxtPlugin(
     const head = injectHead();
     if (!head)
       return;
-    const resolver2 = createSitePathResolver({
+    const resolver = createSitePathResolver({
       withBase: true,
       absolute: true,
       canonical: true
@@ -5386,7 +3798,7 @@ const _1_absoluteImageUrls_server_zDt3Q5SdZ4 = /* @__PURE__ */ defineNuxtPlugin(
               continue;
             if (typeof tag.props.content !== "string" || !tag.props.content.trim() || tag.props.content.startsWith("http") || tag.props.content.startsWith("//"))
               continue;
-            tag.props.content = unref(resolver2(tag.props.content));
+            tag.props.content = unref(resolver(tag.props.content));
           }
         }
       }
@@ -5403,10 +3815,10 @@ const _0_routeRules_server_3qJ8nyBJBb = /* @__PURE__ */ defineNuxtPlugin({
     if (event.context._nitro.routeRules.head)
       head.push(event.context._nitro.routeRules.head, { mode: "server", tagPriority: -9 });
     if (event.context._nitro.routeRules.seoMeta) {
-      const meta = unpackMeta({ ...event.context._nitro.routeRules.seoMeta, tagPriority: -9 });
+      const meta = unpackMeta({ ...event.context._nitro.routeRules.seoMeta });
       head.push({
         meta
-      }, { mode: "server" });
+      }, { mode: "server", tagPriority: -9 });
     }
   }
 });
@@ -5484,7 +3896,7 @@ const plugins = [
   defaults_M8ptihKv0z
 ];
 const layouts = {
-  default: defineAsyncComponent(() => import('./default-DJyAhZTi.mjs').then((m2) => m2.default || m2))
+  default: () => import('./default-Cr6RVSfe.mjs').then((m2) => m2.default || m2)
 };
 const LayoutLoader = defineComponent({
   name: "LayoutLoader",
@@ -5493,8 +3905,9 @@ const LayoutLoader = defineComponent({
     name: String,
     layoutProps: Object
   },
-  setup(props, context) {
-    return () => h$1(layouts[props.name], props.layoutProps, context.slots);
+  async setup(props, context) {
+    const LayoutComponent = await layouts[props.name]().then((r) => r.default || r);
+    return () => h$1(LayoutComponent, props.layoutProps, context.slots);
   }
 });
 const __nuxt_component_0 = defineComponent({
@@ -5586,186 +3999,6 @@ const LayoutProvider = defineComponent({
     };
   }
 });
-const useFormStore = defineStore("form", () => {
-  const formData = reactive({
-    firstName: "",
-    lastName: "",
-    email: "",
-    street: "",
-    city: "",
-    postalCode: ""
-  });
-  const gdpr = ref(false);
-  const submitted = ref(false);
-  const $reset = () => {
-    submitted.value = false;
-    gdpr.value = false;
-    formData.firstName = "";
-    formData.lastName = "";
-    formData.email = "";
-    formData.street = "";
-    formData.city = "";
-    formData.postalCode = "";
-  };
-  const isValidEmail = computed(() => {
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailPattern.test(formData.email);
-  });
-  const isFieldInvalid = computed(() => {
-    return {
-      firstName: formData.firstName.trim() === "" && submitted.value,
-      lastName: formData.lastName.trim() === "" && submitted.value,
-      email: formData.email.trim() === "" && submitted.value,
-      street: formData.street.trim() === "" && submitted.value,
-      city: formData.city.trim() === "" && submitted.value,
-      postalCode: formData.postalCode.trim() === "" && submitted.value
-    };
-  });
-  const isFormEmpty = computed(() => {
-    return !formData.firstName.trim() || !formData.lastName.trim() || !formData.email.trim() || !formData.street.trim() || !formData.city.trim() || !formData.postalCode.trim();
-  });
-  const isFormValid = computed(() => {
-    return !isFormEmpty.value && isValidEmail.value;
-  });
-  const updateFormField = (field, value) => {
-    formData[field] = value;
-  };
-  const submitForm = () => {
-    submitted.value = true;
-    if (!isFormValid.value) {
-      alert("Bitte alle Felder ausfüllen und auf gültige Email-Adresse prüfen!");
-      return;
-    }
-    if (!gdpr.value) {
-      alert("Bitte Datenschutzerklärung akzeptieren!");
-      return;
-    }
-  };
-  return {
-    formData,
-    gdpr,
-    submitted,
-    isFieldInvalid,
-    isFormEmpty,
-    isFormValid,
-    updateFormField,
-    submitForm,
-    isValidEmail,
-    $reset
-  };
-});
-const useMedusaClient = () => {
-  const nuxtApp = useNuxtApp();
-  const { medusa: config } = (/* @__PURE__ */ useRuntimeConfig()).public;
-  if (config.global)
-    return nuxtApp.$medusa;
-  if (!nuxtApp._medusaClient) {
-    nuxtApp._medusaClient = new ua(config);
-  }
-  return nuxtApp._medusaClient;
-};
-const useProductStore = defineStore("products", () => {
-  const products = ref(null);
-  const storeCart = ref(null);
-  const $resetCart = () => {
-    storeCart.value = null;
-  };
-  const fetchProducts = async () => {
-    if (!storeCart || !storeCart.value) {
-      await createCart();
-    }
-    if (storeCart && storeCart.value) {
-      try {
-        const productsList = await useMedusaClient().products.list({
-          cart_id: storeCart.value.id,
-          region_id: storeCart.value.region_id,
-          currency_code: "eur"
-        });
-        products.value = productsList.products;
-      } catch (error) {
-        console.log(error);
-      }
-    }
-  };
-  const createCart = async () => {
-    const client = useMedusaClient();
-    const cart_id = localStorage.getItem("cart_id");
-    if (cart_id) {
-      try {
-        const { cart } = await client.carts.retrieve(cart_id);
-        storeCart.value = cart;
-      } catch (error) {
-        localStorage.removeItem("cart_id");
-        createCart();
-      }
-    } else {
-      const { regions } = await client.regions.list();
-      const { cart } = await client.carts.create({ region_id: regions[0].id });
-      localStorage.setItem("cart_id", cart.id);
-    }
-  };
-  const addToCart = async (variant_id, metadata) => {
-    const client = useMedusaClient();
-    if (storeCart.value) {
-      try {
-        const { cart, response } = await client.carts.lineItems.create(storeCart.value.id, {
-          variant_id,
-          quantity: 1,
-          metadata
-        });
-        storeCart.value = cart;
-      } catch (err) {
-        alert(err.response.data.message);
-      }
-    }
-  };
-  const removeFromCart = async (line_id) => {
-    const client = useMedusaClient();
-    if (storeCart.value) {
-      const { cart } = await client.carts.lineItems.delete(storeCart.value.id, line_id);
-      storeCart.value = cart;
-    }
-  };
-  const completeCart = async () => {
-    const client = useMedusaClient();
-    const formStore = useFormStore();
-    if (!storeCart.value) {
-      return;
-    }
-    if (formStore.isFormValid) {
-      const { cart } = await client.carts.update(storeCart.value.id, {
-        email: formStore.formData.email,
-        shipping_address: {
-          first_name: formStore.formData.firstName,
-          last_name: formStore.formData.lastName,
-          address_1: formStore.formData.street,
-          address_2: "",
-          city: formStore.formData.city,
-          postal_code: formStore.formData.postalCode,
-          country_code: "at",
-          phone: ""
-        }
-      });
-      storeCart.value = cart;
-    }
-    const { shipping_options } = await client.shippingOptions.listCartOptions(storeCart.value.id);
-    console.log(shipping_options, "shipping options");
-    if (shipping_options[0] && shipping_options[0].id) {
-      const { cart } = await client.carts.addShippingMethod(storeCart.value.id, { option_id: shipping_options[0].id });
-      storeCart.value = cart;
-    }
-    const { cart: updatedCart } = await client.carts.createPaymentSessions(storeCart.value.id);
-    storeCart.value = updatedCart;
-    console.log(storeCart.value.payment_sessions, "payment sessions");
-    if (storeCart.value.payment_sessions[0] && storeCart.value.payment_sessions[0].id) {
-      const { cart } = await client.carts.setPaymentSession(storeCart.value.id, { provider_id: "manual" });
-      storeCart.value = cart;
-    }
-    const { type, data } = await client.carts.complete(storeCart.value.id);
-    console.log(type, data);
-  };
-  return { products, fetchProducts, storeCart, createCart, addToCart, removeFromCart, completeCart, $resetCart };
-});
 const _sfc_main$2 = /* @__PURE__ */ defineComponent({
   __name: "app",
   __ssrInlineRender: true,
@@ -5803,8 +4036,8 @@ const _sfc_main$1 = {
     const statusMessage = _error.statusMessage ?? (is404 ? "Page Not Found" : "Internal Server Error");
     const description = _error.message || _error.toString();
     const stack = undefined;
-    const _Error404 = defineAsyncComponent(() => import('./error-404-D8l5TN2G.mjs'));
-    const _Error = defineAsyncComponent(() => import('./error-500-DNX443da.mjs'));
+    const _Error404 = defineAsyncComponent(() => import('./error-404-4VuIdfNj.mjs').then((r) => r.default || r));
+    const _Error = defineAsyncComponent(() => import('./error-500-BVUBRLud.mjs').then((r) => r.default || r));
     const ErrorTemplate = is404 ? _Error404 : _Error;
     return (_ctx, _push, _parent, _attrs) => {
       _push(ssrRenderComponent(unref(ErrorTemplate), mergeProps({ statusCode: unref(statusCode), statusMessage: unref(statusMessage), description: unref(description), stack: unref(stack) }, _attrs), null, _parent));
@@ -5821,7 +4054,7 @@ const _sfc_main = {
   __name: "nuxt-root",
   __ssrInlineRender: true,
   setup(__props) {
-    const IslandRenderer = defineAsyncComponent(() => import('./island-renderer-0g8RoiUV.mjs').then((r) => r.default || r));
+    const IslandRenderer = defineAsyncComponent(() => import('./island-renderer-BrOKRfEn.mjs').then((r) => r.default || r));
     const nuxtApp = useNuxtApp();
     nuxtApp.deferHydration();
     nuxtApp.ssrContext.url;
@@ -5885,5 +4118,5 @@ let entry;
 }
 const entry$1 = (ssrContext) => entry(ssrContext);
 
-export { LayoutMetaSymbol as L, PageRouteSymbol as P, _wrapIf as _, useProductStore as a, useFormStore as b, createError as c, useRequestEvent as d, entry$1 as default, useNuxtApp as e, useRuntimeConfig as f, generateRouteKey$1 as g, appPageTransition as h, injectHead as i, appKeepalive as j, useRouter as k, navigateTo as l, useOgImageRuntimeConfig as m, nuxtLinkDefaults as n, useSiteConfig as o, resolveRouteObject as r, storeToRefs as s, toArray$1 as t, useHead as u, wrapInKeepAlive as w };
+export { LayoutMetaSymbol as L, PageRouteSymbol as P, _wrapIf as _, useRequestEvent as a, useNuxtApp as b, createError as c, useRuntimeConfig as d, entry$1 as default, appPageTransition as e, appKeepalive as f, generateRouteKey$1 as g, useRouter as h, navigateTo as i, defineStore as j, ua as k, useOgImageRuntimeConfig as l, useSiteConfig as m, nuxtLinkDefaults as n, resolveRouteObject as r, storeToRefs as s, toArray$1 as t, useHead as u, wrapInKeepAlive as w };
 //# sourceMappingURL=server.mjs.map

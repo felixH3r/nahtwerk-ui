@@ -1,5 +1,5 @@
 import process from 'node:process';globalThis._importMeta_=globalThis._importMeta_||{url:"file:///_entry.js",env:process.env};import { getRequestDependencies, getPreloadLinks, getPrefetchLinks, createRenderer } from 'vue-bundle-renderer/runtime';
-import { d as defineRenderHandler, b as buildAssetsURL, p as publicAssetsURL, g as getQuery, c as createError, a as getRouteRules, u as useRuntimeConfig, e as getResponseStatus, f as getResponseStatusText, r as readBody, h as destr, i as useNitroApp } from '../nitro/nitro.mjs';
+import { d as defineRenderHandler, b as buildAssetsURL, p as publicAssetsURL, g as getQuery, c as createError, a as getRouteRules, u as useRuntimeConfig, h as hash, e as getResponseStatus, f as getResponseStatusText, r as readBody, i as destr, j as useNitroApp } from '../nitro/nitro.mjs';
 import { stringify, uneval } from 'devalue';
 import { renderToString } from 'vue/server-renderer';
 import { propsToString, renderSSRHead } from '@unhead/ssr';
@@ -7,6 +7,8 @@ import { createServerHead as createServerHead$1, CapoPlugin } from 'unhead';
 import { version, unref } from 'vue';
 import { defineHeadPlugin } from '@unhead/shared';
 import 'lru-cache';
+import '@unocss/core';
+import '@unocss/preset-wind';
 import 'node:http';
 import 'node:https';
 import 'node:fs';
@@ -76,7 +78,7 @@ function createServerHead(options = {}) {
 
 const unheadPlugins = true ? [CapoPlugin({ track: true })] : [];
 
-const renderSSRHeadOptions = {"omitLineBreaks":false};
+const renderSSRHeadOptions = {};
 
 const appHead = {"link":[{"rel":"icon","type":"image/x-icon","href":"/favicon.ico"}],"meta":[{"charset":"utf-8"},{"name":"viewport","content":"width=device-width, initial-scale=1"},{"hid":"description","name":"description","content":"Babykleidung, die auf Regionalität und Nachhaltigkeit setzt. Stoffe von regionalen Händlern, liebevoll von Hand verarbeitet."},{"name":"format-detection","content":"telephone=no"},{"property":"og:type","content":"website"}],"style":[],"script":[],"noscript":[],"title":"Nahtwerk - Mit Liebe gemacht!","htmlAttrs":{"lang":"de"}};
 
@@ -87,8 +89,6 @@ const appRootAttrs = {"id":"__nuxt"};
 const appTeleportTag = "div";
 
 const appTeleportAttrs = {"id":"teleports"};
-
-const appId = "nuxt-app";
 
 globalThis.__buildAssetsURL = buildAssetsURL;
 globalThis.__publicAssetsURL = publicAssetsURL;
@@ -124,11 +124,7 @@ const getSSRRenderer = lazyCachedFunction(async () => {
 });
 const getSPARenderer = lazyCachedFunction(async () => {
   const manifest = await getClientManifest();
-  const spaTemplate = await import('../virtual/_virtual_spa-template.mjs').then((r) => r.template).catch(() => "").then((r) => {
-    {
-      return APP_ROOT_OPEN_TAG + r + APP_ROOT_CLOSE_TAG;
-    }
-  });
+  const spaTemplate = await import('../virtual/_virtual_spa-template.mjs').then((r) => r.template).catch(() => "").then((r) => APP_ROOT_OPEN_TAG + r + APP_ROOT_CLOSE_TAG);
   const options = {
     manifest,
     renderToString: () => spaTemplate,
@@ -140,7 +136,9 @@ const getSPARenderer = lazyCachedFunction(async () => {
   const renderToString = (ssrContext) => {
     const config = useRuntimeConfig(ssrContext.event);
     ssrContext.modules = ssrContext.modules || /* @__PURE__ */ new Set();
-    ssrContext.payload.serverRendered = false;
+    ssrContext.payload = {
+      serverRendered: false
+    };
     ssrContext.config = {
       public: config.public,
       app: config.app
@@ -216,8 +214,14 @@ const renderer = defineRenderHandler(async (event) => {
     nuxt: undefined,
     /* NuxtApp */
     payload: ssrError ? { error: ssrError } : {},
-    _payloadReducers: /* @__PURE__ */ Object.create(null),
+    _payloadReducers: {},
     modules: /* @__PURE__ */ new Set(),
+    set _registeredComponents(value) {
+      this.modules = value;
+    },
+    get _registeredComponents() {
+      return this.modules;
+    },
     islandContext
   };
   const renderer = ssrContext.noSSR ? await getSPARenderer() : await getSSRRenderer();
@@ -248,26 +252,16 @@ const renderer = defineRenderHandler(async (event) => {
   const inlinedStyles = await renderInlineStyles(ssrContext.modules ?? []) ;
   const NO_SCRIPTS = routeOptions.experimentalNoScripts;
   const { styles, scripts } = getRequestDependencies(ssrContext, renderer.rendererContext);
-  if (ssrContext._preloadManifest) {
-    head.push({
-      link: [
-        { rel: "preload", as: "fetch", fetchpriority: "low", crossorigin: "anonymous", href: buildAssetsURL(`builds/meta/${ssrContext.runtimeConfig.app.buildId}.json`) }
-      ]
-    }, { ...headEntryOptions, tagPriority: "low" });
-  }
-  if (inlinedStyles.length) {
-    head.push({ style: inlinedStyles });
-  }
+  head.push({ style: inlinedStyles });
   if (!isRenderingIsland || false) {
     const link = [];
-    for (const resource of Object.values(styles)) {
+    for (const style in styles) {
+      const resource = styles[style];
       {
-        link.push({ rel: "stylesheet", href: renderer.rendererContext.buildAssetsURL(resource.file), crossorigin: "" });
+        link.push({ rel: "stylesheet", href: renderer.rendererContext.buildAssetsURL(resource.file) });
       }
     }
-    if (link.length) {
-      head.push({ link }, headEntryOptions);
-    }
+    head.push({ link }, headEntryOptions);
   }
   if (!NO_SCRIPTS && !isRenderingIsland) {
     head.push({
@@ -277,7 +271,7 @@ const renderer = defineRenderHandler(async (event) => {
       link: getPrefetchLinks(ssrContext, renderer.rendererContext)
     }, headEntryOptions);
     head.push({
-      script: renderPayloadJsonScript({ ssrContext, data: ssrContext.payload }) 
+      script: renderPayloadJsonScript({ id: "__NUXT_DATA__", ssrContext, data: ssrContext.payload }) 
     }, {
       ...headEntryOptions,
       // this should come before another end of body scripts
@@ -313,18 +307,17 @@ const renderer = defineRenderHandler(async (event) => {
   };
   await nitroApp.hooks.callHook("render:html", htmlContext, { event });
   if (isRenderingIsland && islandContext) {
-    const islandHead = {};
-    for (const entry of head.headEntries()) {
-      for (const [key, value] of Object.entries(resolveUnrefHeadInput(entry.input))) {
-        const currentValue = islandHead[key];
-        if (Array.isArray(currentValue)) {
-          currentValue.push(...value);
-        }
-        islandHead[key] = value;
+    const islandHead = {
+      link: [],
+      style: []
+    };
+    for (const tag of await head.resolveTags()) {
+      if (tag.tag === "link") {
+        islandHead.link.push({ key: "island-link-" + hash(tag.props), ...tag.props });
+      } else if (tag.tag === "style" && tag.innerHTML) {
+        islandHead.style.push({ key: "island-style-" + hash(tag.innerHTML), innerHTML: tag.innerHTML });
       }
     }
-    islandHead.link = islandHead.link || [];
-    islandHead.style = islandHead.style || [];
     const islandResponse = {
       id: islandContext.id,
       head: islandHead,
@@ -386,7 +379,7 @@ async function renderInlineStyles(usedModules) {
   const styleMap = await getSSRStyles();
   const inlinedStyles = /* @__PURE__ */ new Set();
   for (const mod of usedModules) {
-    if (mod in styleMap && styleMap[mod]) {
+    if (mod in styleMap) {
       for (const style of await styleMap[mod]()) {
         inlinedStyles.add(style);
       }
@@ -409,21 +402,17 @@ function renderPayloadJsonScript(opts) {
   const contents = opts.data ? stringify(opts.data, opts.ssrContext._payloadReducers) : "";
   const payload = {
     "type": "application/json",
+    "id": opts.id,
     "innerHTML": contents,
-    "data-nuxt-data": appId,
     "data-ssr": !(opts.ssrContext.noSSR)
   };
-  {
-    payload.id = "__NUXT_DATA__";
-  }
   if (opts.src) {
     payload["data-src"] = opts.src;
   }
-  const config = uneval(opts.ssrContext.config);
   return [
     payload,
     {
-      innerHTML: `window.__NUXT__={};window.__NUXT__.config=${config}`
+      innerHTML: `window.__NUXT__={};window.__NUXT__.config=${uneval(opts.ssrContext.config)}`
     }
   ];
 }
@@ -436,7 +425,7 @@ function splitPayload(ssrContext) {
 }
 function getServerComponentHTML(body) {
   const match = body[0].match(ROOT_NODE_REGEX);
-  return match?.[1] || body[0];
+  return match ? match[1] : body[0];
 }
 const SSR_SLOT_TELEPORT_MARKER = /^uid=([^;]*);slot=(.*)$/;
 const SSR_CLIENT_TELEPORT_MARKER = /^uid=([^;]*);client=(.*)$/;
@@ -446,10 +435,10 @@ function getSlotIslandResponse(ssrContext) {
     return undefined;
   }
   const response = {};
-  for (const [name, slot] of Object.entries(ssrContext.islandContext.slots)) {
-    response[name] = {
-      ...slot,
-      fallback: ssrContext.teleports?.[`island-fallback=${name}`]
+  for (const slot in ssrContext.islandContext.slots) {
+    response[slot] = {
+      ...ssrContext.islandContext.slots[slot],
+      fallback: ssrContext.teleports?.[`island-fallback=${slot}`]
     };
   }
   return response;
@@ -459,10 +448,10 @@ function getClientIslandResponse(ssrContext) {
     return undefined;
   }
   const response = {};
-  for (const [clientUid, component] of Object.entries(ssrContext.islandContext.components)) {
-    const html = ssrContext.teleports?.[clientUid]?.replaceAll("<!--teleport start anchor-->", "") || "";
+  for (const clientUid in ssrContext.islandContext.components) {
+    const html = ssrContext.teleports?.[clientUid] || "";
     response[clientUid] = {
-      ...component,
+      ...ssrContext.islandContext.components[clientUid],
       html,
       slots: getComponentSlotTeleport(ssrContext.teleports ?? {})
     };

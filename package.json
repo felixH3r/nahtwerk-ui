@@ -16,11 +16,11 @@
     "@pinia/nuxt": "^0.5.2",
     "@vercel/analytics": "^1.4.1",
     "flowbite": "^2.4.1",
-    "nuxt": "3.15.1",
+    "nuxt": "3.12.3",
     "pinia": "^2.2.0",
     "prettier": "^3.3.3",
     "resend": "^2.0.0",
-    "vue": "3.5.13"
+    "vue": "^3.3.4"
   },
   "devDependencies": {
     "@flydotio/dockerfile": "^0.5.8",
@@ -28,6 +28,6 @@
     "nuxt-medusa": "^0.5.0"
   },
   "overrides": {
-    "vue": "3.5.13"
+    "vue": "^3.3.4"
   }
 }

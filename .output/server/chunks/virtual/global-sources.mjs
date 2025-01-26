@@ -54,16 +54,16 @@ const sources = [
                 "loc": "/"
             },
             {
-                "loc": "/about-me"
-            },
-            {
-                "loc": "/shop"
-            },
-            {
                 "loc": "/impressum"
             },
             {
+                "loc": "/about-me"
+            },
+            {
                 "loc": "/datenschutz"
+            },
+            {
+                "loc": "/shop"
             },
             {
                 "loc": "/danke"
