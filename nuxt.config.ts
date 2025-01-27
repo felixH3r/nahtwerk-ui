@@ -1,6 +1,7 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 
 export default defineNuxtConfig({
+  ssr: false,
   app: {
     head: {
       title: 'Nahtwerk - Mit Liebe gemacht!',
@@ -28,7 +29,7 @@ export default defineNuxtConfig({
   devtools: {enabled: true},
   modules: ['nuxt-medusa', '@nuxtjs/tailwindcss', '@pinia/nuxt', "@nuxt/image", '@nuxtjs/seo'],
   pinia: {
-    storesDirs: ['./stores/**', './custom-folder/stores/**'],
+    storesDirs: ['./stores/**'],
   },
 
   // ISR configuration
@@ -37,5 +38,9 @@ export default defineNuxtConfig({
       crawlLinks: true,
       routes: ['/'],
     }
-  }
+  },
+
+  // experimental: {
+  //   renderJsonPayloads: false
+  // }
 });

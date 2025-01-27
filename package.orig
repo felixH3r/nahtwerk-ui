@@ -1,0 +1,33 @@
+//{
+//  "name": "nuxt-app",
+//  "private": true,
+//  "type": "module",
+//  "scripts": {
+//    "build": "nuxt build",
+//    "dev": "nuxt dev",
+//    "generate": "nuxt generate",
+//    "preview": "nuxt preview",
+//    "postinstall": "nuxt prepare",
+//    "deploy": "fly deploy -c fly.toml"
+//  },
+//  "dependencies": {
+//    "@nuxt/image": "^1.7.0",
+//    "@nuxtjs/seo": "^2.0.2",
+//    "@pinia/nuxt": "^0.5.2",
+//    "axios": "^1.7.9",
+//    "flowbite": "^2.4.1",
+//    "nuxt": "^3.12.3",
+//    "pinia": "^2.2.0",
+//    "prettier": "^3.3.3",
+//    "resend": "^2.0.0",
+//    "vue": "latest"
+//  },
+//  "devDependencies": {
+//    "@flydotio/dockerfile": "^0.5.8",
+//    "@nuxtjs/tailwindcss": "^6.12.1",
+//    "nuxt-medusa": "^0.4.0"
+//  },
+//  "overrides": {
+//    "vue": "latest"
+//  }
+//}
